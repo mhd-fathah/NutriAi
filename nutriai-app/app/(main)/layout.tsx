@@ -18,7 +18,7 @@ export default async function MainLayout({
           {children}
         </div>
       </main>
-      <BottomNav />
+      <BottomNav userName={session.user.name || "User"} userEmail={session.user.email || ""} />
     </div>
   );
 }
