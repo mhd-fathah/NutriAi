@@ -99,6 +99,33 @@ export async function getDashboardData(): Promise<ActionResult<DashboardData>> {
 
     const weeklyData = Array.from(weeklyMap.values());
 
+    // Calculate Streak Dynamically
+    const allMeals = await Meal.find({ userId: userId }).sort({ createdAt: -1 });
+    let streak = 0;
+    if (allMeals.length > 0) {
+      const mealDates = allMeals.map(m => {
+        const d = new Date(m.createdAt);
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      });
+      const uniqueSortedDates = Array.from(new Set(mealDates)).sort((a, b) => b - a);
+
+      const today = new Date();
+      const todayTime = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+      const yesterdayTime = todayTime - 24 * 60 * 60 * 1000;
+
+      // Ensure user logged a meal today or at least yesterday to maintain streak
+      if (uniqueSortedDates[0] === todayTime || uniqueSortedDates[0] === yesterdayTime) {
+        streak = 1;
+        for (let i = 0; i < uniqueSortedDates.length - 1; i++) {
+          if (uniqueSortedDates[i] - uniqueSortedDates[i + 1] === 24 * 60 * 60 * 1000) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
     // Latest tips from most recent meal
     const latestTips = todayMeals[0]?.aiTips || [];
 
@@ -130,6 +157,7 @@ export async function getDashboardData(): Promise<ActionResult<DashboardData>> {
         todayNutrition,
         weeklyData,
         latestTips,
+        streak,
       },
     };
   } catch {

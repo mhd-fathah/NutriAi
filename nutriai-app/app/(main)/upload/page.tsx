@@ -141,85 +141,96 @@ export default function UploadPage() {
     const meal = result;
     console.log("UI_IMAGE_URL", meal.imageUrl);
     return (
-      <div className="max-w-lg mx-auto animate-fade-in-up">
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="relative h-56">
+      <div className="max-w-2xl mx-auto animate-fade-in-up pb-10 space-y-8">
+        {/* RESULT HERO */}
+        <div className="relative overflow-hidden rounded-3xl border border-emerald-500/10 shadow-2xl bg-slate-950">
+          <div className="relative h-64 md:h-80 w-full overflow-hidden">
             <Image
               src={meal.imageUrl ? meal.imageUrl : "/images/food-placeholder.jpg"}
               alt={meal.foodName}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
+              className="object-cover transition-transform duration-700 hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-5">
-              <div className="flex items-center gap-2 mb-1">
-                {result.isEstimated ? (
-                  <>
-                    <AlertCircle className="w-5 h-5 text-amber-400" />
-                    <p className="text-amber-300 text-sm font-medium">Estimated values used (AI Busy)</p>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-5 h-5 text-emerald-400" />
-                    <p className="text-emerald-300 text-sm font-medium">AI Analysis Complete</p>
-                  </>
-                )}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+            
+            {/* AI CONFIDENCE BADGE */}
+            <div className="absolute top-4 left-4 z-10">
+              {result.isEstimated ? (
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 bg-amber-950/80 border border-amber-500/20 px-3 py-1.5 rounded-full backdrop-blur-md">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Estimated values used (AI Busy)</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/20 px-3 py-1.5 rounded-full backdrop-blur-md">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>AI Analysis Complete</span>
+                </div>
+              )}
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500 text-white uppercase tracking-wider">
+                  {mealType}
+                </span>
+                <span className="text-xs font-bold text-gray-300">
+                  {new Date(result.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </div>
-              <h2 className="text-white text-xl font-bold">{result.foodName}</h2>
-              <p className="text-white/60 text-sm">~{result.estimatedWeight}</p>
+              <h2 className="text-white text-3xl font-extrabold tracking-tight">{result.foodName}</h2>
+              <p className="text-gray-300 text-sm font-semibold">Weight: ~{result.estimatedWeight}</p>
             </div>
           </div>
-          <div className="p-6">
-            <div className="grid grid-cols-2 gap-3 mb-6">
+
+          <div className="p-6 md:p-8 space-y-6 bg-white">
+            {/* NUTRITION METRICS */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {[
-                { label: "Calories", value: result.calories, unit: "kcal", color: "emerald" },
-                { label: "Protein", value: result.protein, unit: "g", color: "blue" },
-                { label: "Carbs", value: result.carbs, unit: "g", color: "amber" },
-                { label: "Fat", value: result.fat, unit: "g", color: "purple" },
-                { label: "Sugar", value: result.sugar, unit: "g", color: "rose" },
-              ].map(({ label, value, unit, color }) => (
-                <div key={label} className={cn(
-                  "rounded-xl p-3 text-center",
-                  color === "emerald" && "bg-emerald-50",
-                  color === "blue" && "bg-blue-50",
-                  color === "amber" && "bg-amber-50",
-                  color === "purple" && "bg-purple-50",
-                  color === "rose" && "bg-rose-50",
-                )}>
-                  <p className="text-xs text-gray-500 mb-0.5">{label}</p>
-                  <p className={cn(
-                    "text-xl font-bold",
-                    color === "emerald" && "text-emerald-700",
-                    color === "blue" && "text-blue-700",
-                    color === "amber" && "text-amber-700",
-                    color === "purple" && "text-purple-700",
-                    color === "rose" && "text-rose-700",
-                  )}>{Math.round(value)}<span className="text-sm font-normal ml-0.5">{unit}</span></p>
+                { label: "Calories", value: result.calories, unit: "kcal", color: "rose", bg: "bg-rose-50/50", border: "border-rose-100/50", text: "text-rose-700" },
+                { label: "Protein", value: result.protein, unit: "g", color: "emerald", bg: "bg-emerald-50/50", border: "border-emerald-100/50", text: "text-emerald-700" },
+                { label: "Carbs", value: result.carbs, unit: "g", color: "blue", bg: "bg-blue-50/50", border: "border-blue-100/50", text: "text-blue-700" },
+                { label: "Fat", value: result.fat, unit: "g", color: "amber", bg: "bg-amber-50/50", border: "border-amber-100/50", text: "text-amber-700" },
+                { label: "Sugar", value: result.sugar, unit: "g", color: "purple", bg: "bg-purple-50/50", border: "border-purple-100/50", text: "text-purple-700" },
+              ].map(({ label, value, unit, border, text }) => (
+                <div key={label} className={cn("rounded-2xl p-4 text-center border bg-white shadow-sm hover:-translate-y-0.5 transition-all duration-200", border)}>
+                  <p className="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">{label}</p>
+                  <p className={cn("text-2xl font-black leading-none", text)}>
+                    {Math.round(value)}
+                    <span className="text-xs font-semibold text-gray-400 ml-0.5">{unit}</span>
+                  </p>
                 </div>
               ))}
             </div>
 
+            {/* AI COACH PANEL */}
             {result.aiTips.length > 0 && (
-              <div className="mb-5">
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <Sparkles className="w-4 h-4 text-emerald-500" />
-                  <p className="text-sm font-semibold text-gray-900">AI Nutrition Tips</p>
+              <div className="bg-emerald-500/[0.02] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                    <Sparkles size={16} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">AI Nutrition Coach Insights</h3>
+                    <p className="text-[11px] text-gray-400">Personal recommendations based on this meal</p>
+                  </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5 pl-1">
                   {result.aiTips.map((tip, i) => (
-                    <p key={i} className="text-xs text-gray-600 flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">✓</span> {tip}
-                    </p>
+                    <div key={i} className="flex items-start gap-2.5 text-xs text-gray-600">
+                      <span className="text-emerald-500 font-bold mt-0.5">✓</span>
+                      <p className="leading-relaxed">{tip}</p>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="flex gap-3">
+            {/* ACTION BUTTONS */}
+            <div className="flex gap-4 pt-2">
               <Button
                 variant="outline"
-                className="flex-1"
+                className="flex-1 py-3.5 rounded-2xl font-bold border-gray-200 text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition-all"
                 onClick={() => {
                   setSelectedFile(null);
                   setPreview(null);
@@ -228,7 +239,10 @@ export default function UploadPage() {
               >
                 Log another
               </Button>
-              <Button className="flex-1" onClick={() => router.push("/dashboard")}>
+              <Button 
+                className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.98] transition-all" 
+                onClick={() => router.push("/dashboard")}
+              >
                 View dashboard
               </Button>
             </div>
@@ -239,54 +253,90 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto animate-fade-in-up">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Log a Meal</h1>
-        <p className="text-sm text-gray-500 mt-1">Upload a photo and let AI analyze your nutrition</p>
+    <div className="max-w-2xl mx-auto animate-fade-in-up pb-10 space-y-8">
+      {/* SECTION 1: PREMIUM HERO */}
+      <div className="relative overflow-hidden rounded-3xl border border-emerald-500/10 bg-gradient-to-br from-emerald-950 via-slate-900 to-black p-6 md:p-8 shadow-xl shadow-emerald-500/5">
+        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl" />
+        
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-xl backdrop-blur-md">
+              ✨
+            </div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">
+              AI Food Scanner
+            </h1>
+            <p className="text-sm text-gray-300 max-w-xl leading-relaxed">
+              Upload a meal photo and get instant nutrition analysis. Powered by Google Gemini AI, it calculates calories, counts target macros, and gives insights.
+            </p>
+            
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              {[
+                "AI Food Recognition",
+                "Nutrition Breakdown",
+                "Calorie Tracking",
+                "Personal Coaching Insights"
+              ].map((feature) => (
+                <span key={feature} className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                  ✓ {feature}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 space-y-5">
-        {/* Meal type */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 space-y-6">
+        {/* SECTION 2: MEAL TYPE SELECTOR */}
         <div>
-          <p className="text-sm font-medium text-gray-700 mb-3">Meal Type</p>
-          <div className="grid grid-cols-4 gap-2">
+          <p className="text-sm font-bold text-gray-900 mb-3.5 tracking-tight uppercase">Meal Type</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {mealTypeOptions.map(({ value, label, icon }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setMealType(value)}
                 className={cn(
-                  "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200",
+                  "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-300 active:scale-[0.97]",
                   mealType === value
-                    ? "border-emerald-500 bg-emerald-50"
-                    : "border-gray-100 hover:border-gray-200"
+                    ? "border-emerald-500 bg-emerald-50/50 shadow-lg shadow-emerald-500/5 text-emerald-700"
+                    : "border-gray-100 hover:border-gray-200 text-gray-600 bg-white"
                 )}
               >
-                <span className="text-xl">{icon}</span>
-                <span className={cn(
-                  "text-xs font-medium",
-                  mealType === value ? "text-emerald-700" : "text-gray-600"
-                )}>{label}</span>
+                <span className="text-2xl transition-transform duration-300 hover:scale-110">{icon}</span>
+                <span className="text-xs font-bold tracking-tight">{label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Drop zone */}
+        {/* SECTION 3 & 4: UPLOAD AREA / IMAGE PREVIEW */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           onClick={() => !preview && fileInputRef.current?.click()}
           className={cn(
-            "relative border-2 border-dashed rounded-2xl transition-all duration-200 overflow-hidden",
-            preview ? "border-transparent cursor-default" : "cursor-pointer",
-            dragging ? "border-emerald-500 bg-emerald-50" : preview ? "" : "border-gray-200 hover:border-emerald-400 hover:bg-gray-50"
+            "relative border-2 border-dashed rounded-3xl transition-all duration-300 overflow-hidden",
+            preview ? "border-transparent shadow-md" : "cursor-pointer border-gray-200 hover:border-emerald-400 hover:bg-emerald-500/[0.01]",
+            dragging ? "border-emerald-500 bg-emerald-50/50" : ""
           )}
         >
           {preview ? (
-            <div className="relative h-64">
-              <Image src={preview} alt="Preview" fill className="object-cover rounded-2xl" />
+            <div className="relative h-72 w-full group">
+              <Image src={preview} alt="Preview" fill className="object-cover transition-transform duration-75" />
+              
+              {/* Floating Image overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30" />
+              
+              <div className="absolute bottom-4 left-4 text-white space-y-1">
+                <p className="text-xs font-semibold bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-md w-fit">
+                  {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : ""}
+                </p>
+                <p className="text-sm font-bold capitalize">Selected: {mealType}</p>
+              </div>
+
               <button
                 type="button"
                 onClick={(e) => {
@@ -294,18 +344,23 @@ export default function UploadPage() {
                   setSelectedFile(null);
                   setPreview(null);
                 }}
-                className="absolute top-3 right-3 w-7 h-7 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
+                className="absolute top-4 right-4 w-9 h-9 bg-black/60 hover:bg-black/80 hover:scale-105 text-white rounded-full flex items-center justify-center transition-all shadow-md active:scale-95"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-              <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-3">
-                <Camera className="w-7 h-7 text-emerald-500" />
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-4">
+              <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-600">
+                <Camera className="w-8 h-8" />
               </div>
-              <p className="text-sm font-semibold text-gray-900">Drop your meal photo here</p>
-              <p className="text-xs text-gray-400 mt-1">or click to browse · JPEG, PNG, WebP · max 10MB</p>
+              <div className="space-y-1">
+                <p className="text-base font-bold text-gray-900">Upload Meal Photo</p>
+                <p className="text-xs text-gray-400">Drag & drop your file here, or click to browse</p>
+              </div>
+              <p className="text-[10px] text-gray-400 font-semibold bg-gray-50 border border-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">
+                JPEG, PNG, WebP &bull; max 10MB
+              </p>
             </div>
           )}
         </div>
@@ -324,7 +379,7 @@ export default function UploadPage() {
         {!preview && (
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full py-3.5 rounded-2xl font-bold border-gray-200 text-gray-700 hover:bg-gray-50 active:scale-[0.99] transition-all"
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload size={16} />
@@ -332,17 +387,54 @@ export default function UploadPage() {
           </Button>
         )}
 
-        <Button
-          className="w-full"
-          size="lg"
-          loading={loading}
-          disabled={!selectedFile}
-          onClick={handleAnalyze}
-        >
-          <Sparkles size={16} />
-          {loading ? "Analyzing with AI..." : "Analyze with Gemini AI"}
-        </Button>
+        {/* SECTION 5: AI ANALYSIS BUTTON & CUSTOM LOADER VIEW */}
+        {loading ? (
+          <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl p-6 space-y-4 animate-pulse">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">🤖</span>
+              <div>
+                <p className="text-sm font-bold">Gemini AI is scanning your meal...</p>
+                <p className="text-xs text-gray-400">Please keep this window open</p>
+              </div>
+            </div>
+            <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 rounded-full w-2/3 animate-infinite-scroll" />
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800 text-[11px] text-gray-400">
+              <p className="flex items-center gap-1.5">✓ Uploading image</p>
+              <p className="flex items-center gap-1.5 animate-pulse">&bull; Identifying foods</p>
+              <p className="flex items-center gap-1.5 text-gray-600">&bull; Calculating macros</p>
+              <p className="flex items-center gap-1.5 text-gray-600">&bull; Writing tips</p>
+            </div>
+          </div>
+        ) : (
+          <Button
+            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-base font-bold py-4 rounded-2xl shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.98] transition-all"
+            size="lg"
+            disabled={!selectedFile}
+            onClick={handleAnalyze}
+          >
+            <Sparkles size={16} />
+            Analyze with Gemini AI
+          </Button>
+        )}
       </div>
+
+      {/* EMPTY ONBOARDING TIPS SECTION */}
+      {!preview && !loading && (
+        <div className="bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">💡</span>
+            <p className="text-sm font-bold text-gray-900">Tips for Best Analysis Accuracy</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-500">
+            <p className="flex items-center gap-1.5">&bull; Take photo in bright, natural light</p>
+            <p className="flex items-center gap-1.5">&bull; Keep all food centered in frame</p>
+            <p className="flex items-center gap-1.5">&bull; Use a clear top-down angle</p>
+            <p className="flex items-center gap-1.5">&bull; Avoid motion blur or dark frames</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

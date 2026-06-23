@@ -16,17 +16,6 @@ export default function AIInsights({ tips, hasData }: AIInsightsProps) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-emerald-600" />
-        </div>
-        <h2 className="text-base font-semibold text-gray-900">AI Nutrition Coach</h2>
-        {!hasData && (
-          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-            Log a meal first
-          </span>
-        )}
-      </div>
       <div className="space-y-2.5">
         {displayTips.map((tip, i) => (
           <div

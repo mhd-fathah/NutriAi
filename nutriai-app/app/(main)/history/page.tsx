@@ -10,6 +10,9 @@ import { CaloriesLineChart } from "@/components/analytics/Charts";
 import EmptyState from "@/components/shared/EmptyState";
 import { SkeletonCard } from "@/components/shared/Loader";
 import { cn } from "@/utils";
+import Link from "next/link";
+import Button from "@/components/shared/Button";
+import { Calendar, Flame, Layers, Sparkles, TrendingUp } from "lucide-react";
 
 type Period = "daily" | "weekly" | "monthly";
 
@@ -19,11 +22,31 @@ const tabs: { value: Period; label: string }[] = [
   { value: "monthly", label: "This Month" },
 ];
 
-function SummaryCard({ label, value, unit }: { label: string; value: number; unit: string }) {
+function SummaryCard({ label, value, unit, icon, color }: { label: string; value: number; unit: string; icon: string; color: "emerald" | "blue" | "amber" | "rose" | "purple" }) {
+  const colorMap = {
+    emerald: { bg: "bg-emerald-50 text-emerald-600", border: "border-emerald-100/50" },
+    blue: { bg: "bg-blue-50 text-blue-600", border: "border-blue-100/50" },
+    amber: { bg: "bg-amber-50 text-amber-600", border: "border-amber-100/50" },
+    rose: { bg: "bg-rose-50 text-rose-600", border: "border-rose-100/50" },
+    purple: { bg: "bg-purple-50 text-purple-600", border: "border-purple-100/50" }
+  };
+  const theme = colorMap[color] || colorMap.emerald;
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className="text-xl font-bold text-gray-900">{Math.round(value)}<span className="text-sm font-normal text-gray-400 ml-0.5">{unit}</span></p>
+    <div className={cn("bg-white rounded-3xl border border-gray-100 p-5 shadow-xl shadow-gray-100/40 hover:-translate-y-1 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300 relative overflow-hidden group", theme.border)}>
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50 rounded-full -mr-12 -mt-12 blur-2xl opacity-50 group-hover:scale-125 transition-transform duration-500" />
+      <div className="flex items-center justify-between mb-3 relative z-10">
+        <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-lg font-semibold", theme.bg)}>
+          {icon}
+        </div>
+      </div>
+      <div className="space-y-1 relative z-10">
+        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{label}</p>
+        <p className="text-3xl font-extrabold text-gray-900 leading-none">
+          {Math.round(value)}
+          <span className="text-sm font-semibold text-gray-400 ml-0.5">{unit}</span>
+        </p>
+      </div>
     </div>
   );
 }
@@ -31,24 +54,35 @@ function SummaryCard({ label, value, unit }: { label: string; value: number; uni
 function MealHistoryCard({ meal }: { meal: MealRecord }) {
   const mealInfo = MEAL_TYPES[meal.mealType];
   return (
-    <div className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-sm transition-all">
-      <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-        <Image src={meal.imageUrl ? meal.imageUrl : "/images/food-placeholder.jpg"} alt={meal.foodName} fill className="object-cover" sizes="64px" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-900 text-sm truncate">{meal.foodName}</p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-            {mealInfo?.icon} {mealInfo?.label}
-          </span>
-          <span className="text-xs text-gray-400">{formatDate(meal.createdAt)}</span>
-          <span className="text-xs text-gray-400">{formatTime(meal.createdAt)}</span>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white rounded-3xl border border-gray-100 hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300 group">
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-100 shadow-inner">
+          <Image 
+            src={meal.imageUrl ? meal.imageUrl : "/images/food-placeholder.jpg"} 
+            alt={meal.foodName} 
+            fill 
+            className="object-cover group-hover:scale-105 transition-transform duration-500" 
+            sizes="80px" 
+          />
         </div>
-        <div className="flex items-center gap-3 mt-1">
-          <span className="text-sm font-semibold text-emerald-600">{meal.calories} kcal</span>
-          <span className="text-xs text-gray-400">P: {meal.protein}g</span>
-          <span className="text-xs text-gray-400">C: {meal.carbs}g</span>
-          <span className="text-xs text-gray-400">F: {meal.fat}g</span>
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <p className="font-bold text-gray-900 text-lg tracking-tight truncate">{meal.foodName}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-semibold">
+              {mealInfo?.icon} {mealInfo?.label}
+            </span>
+            <span className="text-xs font-medium text-gray-400">{formatDate(meal.createdAt)}</span>
+            <span className="text-xs font-medium text-gray-400">&bull; {formatTime(meal.createdAt)}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-50 flex-shrink-0">
+        <span className="text-xl font-extrabold text-emerald-600 tracking-tight">{meal.calories} kcal</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">P: {meal.protein}g</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700">C: {meal.carbs}g</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">F: {meal.fat}g</span>
         </div>
       </div>
     </div>
@@ -91,64 +125,120 @@ export default function HistoryPage() {
     : [];
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Meal History</h1>
-        <p className="text-sm text-gray-500 mt-1">Track your nutrition over time</p>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex bg-gray-100 p-1 rounded-xl w-fit">
-        {tabs.map(({ value, label }) => (
-          <button
-            key={value}
-            onClick={() => setPeriod(value)}
-            className={cn(
-              "px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-              period === value
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+    <div className="space-y-8 animate-fade-in-up pb-10">
+      {/* SECTION 1: PREMIUM HERO HEADER */}
+      <div className="relative overflow-hidden rounded-3xl border border-emerald-500/10 bg-gradient-to-br from-emerald-950 via-slate-900 to-black p-6 md:p-8 shadow-xl shadow-emerald-500/5">
+        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl" />
+        
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <p className="text-xs md:text-sm font-semibold tracking-wider text-emerald-400 uppercase">
+              Meal Analytics
+            </p>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-2">
+              🥗 Meal History
+            </h1>
+            <p className="text-sm text-gray-300 max-w-xl">
+              Track your nutrition journey, analyze eating patterns, and measure daily macro distributions.
+            </p>
+            {data && (
+              <div className="flex items-center gap-3 pt-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                  <Layers size={12} />
+                  {data.meals.length} {data.meals.length === 1 ? "Meal" : "Meals"} Logged
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
+                  <Flame size={12} />
+                  {Math.round(data.summary.totalCalories)} Total Calories
+                </span>
+              </div>
             )}
-          >
-            {label}
-          </button>
-        ))}
+          </div>
+          
+          {/* SECTION 2: PERIOD FILTERS */}
+          <div className="flex-shrink-0 bg-white/5 border border-white/10 p-1.5 rounded-2xl backdrop-blur-md self-start md:self-auto">
+            <div className="flex items-center gap-1">
+              {tabs.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setPeriod(value)}
+                  className={cn(
+                    "px-4 py-2 text-xs md:text-sm font-bold rounded-xl transition-all duration-200",
+                    period === value
+                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                      : "text-gray-300 hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : data ? (
         <>
-          {/* Summary Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <SummaryCard label="Total Calories" value={data.summary.totalCalories} unit="kcal" />
-            <SummaryCard label="Daily Average" value={data.summary.avgCalories} unit="kcal/day" />
-            <SummaryCard label="Total Protein" value={data.summary.totalProtein} unit="g" />
-            <SummaryCard label="Total Carbs" value={data.summary.totalCarbs} unit="g" />
-            <SummaryCard label="Total Fat" value={data.summary.totalFat} unit="g" />
+          {/* SECTION 3: NUTRITION OVERVIEW */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <SummaryCard label="Total Calories" value={data.summary.totalCalories} unit="kcal" icon="🔥" color="rose" />
+            <SummaryCard label="Daily Average" value={data.summary.avgCalories} unit="kcal/day" icon="📊" color="purple" />
+            <SummaryCard label="Total Protein" value={data.summary.totalProtein} unit="g" icon="🥩" color="emerald" />
+            <SummaryCard label="Total Carbs" value={data.summary.totalCarbs} unit="g" icon="🌾" color="blue" />
+            <SummaryCard label="Total Fat" value={data.summary.totalFat} unit="g" icon="🥑" color="amber" />
           </div>
 
-          {/* Chart (for weekly/monthly) */}
+          {/* SECTION 4: TREND ANALYTICS */}
           {period !== "daily" && chartData.length > 0 && (
-            <CaloriesLineChart data={chartData} dailyCalories={0} />
-          )}
-
-          {/* Meals list */}
-          {data.meals.length === 0 ? (
-            <EmptyState
-              icon="📋"
-              title="No meals found"
-              description={`You haven't logged any meals ${period === "daily" ? "today" : period === "weekly" ? "this week" : "this month"} yet.`}
-            />
-          ) : (
-            <div className="space-y-3">
-              {data.meals.map((meal) => (
-                <MealHistoryCard key={meal._id} meal={meal} />
-              ))}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                  <TrendingUp size={16} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 tracking-tight">Calorie Trends</h2>
+                  <p className="text-xs text-gray-400">View calorie intake patterns and comparisons</p>
+                </div>
+              </div>
+              <CaloriesLineChart data={chartData} dailyCalories={0} />
             </div>
           )}
+
+          {/* SECTION 5: MEAL HISTORY TIMELINE */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Timeline Log</h2>
+                <p className="text-xs text-gray-400 font-medium">List of logged meals in this cycle</p>
+              </div>
+            </div>
+            
+            {data.meals.length === 0 ? (
+              <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-8">
+                <EmptyState
+                  icon="📋"
+                  title="No meals logged yet"
+                  description={`You haven't logged any meals ${period === "daily" ? "today" : period === "weekly" ? "this week" : "this month"} yet. Let's record your next meal!`}
+                  action={
+                    <Link href="/upload">
+                      <Button size="sm">Log first meal</Button>
+                    </Link>
+                  }
+                />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {data.meals.map((meal) => (
+                  <MealHistoryCard key={meal._id} meal={meal} />
+                ))}
+              </div>
+            )}
+          </div>
         </>
       ) : null}
     </div>

@@ -86,6 +86,7 @@ export interface DashboardData {
   todayNutrition: DailyNutrition;
   weeklyData: WeeklyDataPoint[];
   latestTips: string[];
+  streak?: number;
 }
 
 export interface WeeklyDataPoint {
