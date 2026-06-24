@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     title: "NutriAI",
   },
   icons: {
+    icon: "/favicon.ico",
     apple: "/icons/icon-192x192.png",
   },
   openGraph: {
