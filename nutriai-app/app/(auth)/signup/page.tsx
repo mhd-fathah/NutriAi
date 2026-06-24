@@ -10,6 +10,7 @@ import { RegisterSchema, RegisterInput } from "@/lib/validations";
 import { registerUser } from "@/actions/auth.actions";
 import Button from "@/components/shared/Button";
 import Input from "@/components/shared/Input";
+import GoogleButton from "@/components/shared/GoogleButton";
 import { Mail, Lock, User, Sparkles, TrendingUp, Target, ShieldCheck } from "lucide-react";
 import { cn } from "@/utils";
 import Logo from "@/components/shared/Logo";
@@ -205,6 +206,16 @@ export default function SignupPage() {
                 Create My Account
               </Button>
             </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-4">
+              <div className="h-px bg-gray-150 flex-1" />
+              <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">or continue with</span>
+              <div className="h-px bg-gray-150 flex-1" />
+            </div>
+
+            {/* Google Button */}
+            <GoogleButton mode="signup" />
 
             {/* Post signup info */}
             <div className="bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 rounded-2xl p-4 space-y-2">

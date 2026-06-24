@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/lib/auth/auth";
+import { auth, unstable_update } from "@/lib/auth/auth";
 import { connectDB } from "@/infrastructure/database/mongodb";
 import User from "@/models/User";
 import { OnboardingSchema } from "@/lib/validations";
@@ -39,6 +39,14 @@ export async function completeOnboarding(
       dailyCarbs: goals.dailyCarbs,
       dailyFat: goals.dailyFat,
       onboardingCompleted: true,
+    });
+
+    // Update NextAuth session cookie server-side
+    await unstable_update({
+      user: {
+        ...session.user,
+        onboardingCompleted: true,
+      }
     });
 
     return { success: true };

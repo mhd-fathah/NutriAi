@@ -1,22 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { LoginSchema, LoginInput } from "@/lib/validations";
 import Button from "@/components/shared/Button";
+import GoogleButton from "@/components/shared/GoogleButton";
 import { Mail, Lock, Eye, EyeOff, Sparkles, TrendingUp, Target, ShieldCheck } from "lucide-react";
 import { cn } from "@/utils";
 import Logo from "@/components/shared/Logo";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      if (errorParam === "OAuthSignin" || errorParam === "OAuthCallback") {
+        toast.error("Google sign-in was cancelled or failed. Please try again.");
+      } else if (errorParam === "OAuthCreateAccount") {
+        toast.error("Could not link Google account. Please try again.");
+      } else {
+        toast.error("Authentication failed. Please try again.");
+      }
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -204,6 +219,16 @@ export default function LoginPage() {
               </Button>
             </form>
 
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-4">
+              <div className="h-px bg-gray-150 flex-1" />
+              <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">or continue with</span>
+              <div className="h-px bg-gray-150 flex-1" />
+            </div>
+
+            {/* Google Button */}
+            <GoogleButton mode="signin" />
+
             {/* Social proof badges */}
             <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-4 text-[10px] text-gray-400 font-bold tracking-wider uppercase">
               <span className="flex items-center gap-1"><Sparkles size={11} className="text-emerald-500" /> AI Insights</span>
@@ -224,5 +249,17 @@ export default function LoginPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
+        <p className="text-sm font-semibold text-gray-500 animate-pulse">Loading auth...</p>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

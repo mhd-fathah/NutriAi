@@ -18,8 +18,22 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (isLoggedIn && (nextUrl.pathname === "/login" || nextUrl.pathname === "/signup")) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+  if (isLoggedIn) {
+    const onboardingCompleted = (req.auth?.user as any)?.onboardingCompleted;
+
+    if (nextUrl.pathname === "/login" || nextUrl.pathname === "/signup") {
+      return NextResponse.redirect(
+        new URL(onboardingCompleted ? "/dashboard" : "/onboarding", req.url)
+      );
+    }
+
+    if (nextUrl.pathname === "/onboarding" && onboardingCompleted) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    if (isProtectedRoute && nextUrl.pathname !== "/onboarding" && !onboardingCompleted) {
+      return NextResponse.redirect(new URL("/onboarding", req.url));
+    }
   }
 
   return NextResponse.next();

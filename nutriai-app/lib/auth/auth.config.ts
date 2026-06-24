@@ -8,10 +8,17 @@ export const authConfig: NextAuthConfig = {
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.onboardingCompleted = (user as { onboardingCompleted?: boolean }).onboardingCompleted;
+        token.provider = (user as { provider?: string }).provider || account?.provider;
+        token.image = user.image;
+      }
+      if (trigger === "update" && session?.user) {
+        token.onboardingCompleted = session.user.onboardingCompleted;
+        if (session.user.image) token.image = session.user.image;
+        if (session.user.name) token.name = session.user.name;
       }
       return token;
     },
@@ -20,6 +27,10 @@ export const authConfig: NextAuthConfig = {
         session.user.id = token.id as string;
         (session.user as { onboardingCompleted?: boolean }).onboardingCompleted =
           token.onboardingCompleted as boolean;
+        (session.user as { provider?: string }).provider = token.provider as string;
+        if (token.image) {
+          session.user.image = token.image as string;
+        }
       }
       return session;
     },

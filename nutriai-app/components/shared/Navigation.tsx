@@ -14,7 +14,7 @@ const navItems = [
   { href: "/history", label: "History", icon: History },
 ];
 
-export function Sidebar({ userName }: { userName: string }) {
+export function Sidebar({ userName, userImage }: { userName: string; userImage?: string }) {
   const pathname = usePathname();
 
   return (
@@ -62,9 +62,13 @@ export function Sidebar({ userName }: { userName: string }) {
       {/* USER PROFILE SECTION */}
       <div className="p-4 border-t border-gray-100 space-y-4">
         <div className="flex items-center gap-3 p-2 bg-gray-50/50 border border-gray-100 rounded-2xl shadow-sm">
-          <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-xl flex items-center justify-center font-bold text-sm">
-            {userName?.charAt(0).toUpperCase()}
-          </div>
+          {userImage ? (
+            <img src={userImage} alt={userName} className="w-9 h-9 rounded-xl object-cover border border-emerald-500/20" />
+          ) : (
+            <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-xl flex items-center justify-center font-bold text-sm">
+              {userName?.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-gray-900 truncate leading-tight">{userName}</p>
             <p className="text-[9px] font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
@@ -96,7 +100,7 @@ export function Sidebar({ userName }: { userName: string }) {
   );
 }
 
-export function BottomNav({ userName, userEmail }: { userName: string; userEmail?: string }) {
+export function BottomNav({ userName, userEmail, userImage }: { userName: string; userEmail?: string; userImage?: string }) {
   const pathname = usePathname();
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
@@ -139,9 +143,13 @@ export function BottomNav({ userName, userEmail }: { userName: string; userEmail
 
         {/* Mobile Profile Card */}
         <div className="p-4 bg-emerald-50/40 border border-emerald-500/10 backdrop-blur-md rounded-[20px] shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-2xl flex items-center justify-center font-extrabold text-lg shadow-inner">
-            {userName?.charAt(0).toUpperCase()}
-          </div>
+          {userImage ? (
+            <img src={userImage} alt={userName} className="w-12 h-12 rounded-2xl object-cover border border-emerald-500/20 shadow-inner" />
+          ) : (
+            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-2xl flex items-center justify-center font-extrabold text-lg shadow-inner">
+              {userName?.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-bold text-gray-900 truncate leading-tight">{userName}</h4>
             {userEmail && <p className="text-xs text-gray-500 truncate mt-0.5">{userEmail}</p>}

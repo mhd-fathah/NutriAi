@@ -65,6 +65,7 @@ export default function OnboardingPage() {
       const result = await completeOnboarding(data);
       if (result.success) {
         toast.success("Profile saved! Let's start tracking.");
+        router.refresh();
         router.push("/dashboard");
       } else {
         toast.error(result.error || "Failed to save profile");
