@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import InstallPWA from "@/components/shared/InstallPWA";
 
 export const metadata: Metadata = {
   title: {
@@ -12,11 +13,28 @@ export const metadata: Metadata = {
     "Track your nutrition with AI. Upload meal photos, get instant calorie analysis, and receive personalized nutrition coaching powered by Gemini Vision AI.",
   keywords: ["nutrition tracker", "AI nutrition", "calorie counter", "meal tracker", "food AI"],
   authors: [{ name: "NutriAI" }],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "NutriAI",
+  },
+  icons: {
+    apple: "/icons/icon-192x192.png",
+  },
   openGraph: {
     title: "NutriAI — AI-Powered Nutrition Tracker",
     description: "Track your nutrition with AI. Upload meal photos, get instant calorie analysis.",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#10B981",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -29,6 +47,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           {children}
+          <InstallPWA />
           <Toaster
             position="top-right"
             richColors
