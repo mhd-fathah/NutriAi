@@ -41,8 +41,7 @@ export const CoachingRecommendationSchema = z.object({
 });
 
 export const PersonalizedCoachingSchema = z.object({
-  summary: z.string(),
-  recommendations: z.array(CoachingRecommendationSchema),
+  insights: z.array(z.string()).min(1).max(3),
 });
 
 export const NutritionTipsSchema = z.object({

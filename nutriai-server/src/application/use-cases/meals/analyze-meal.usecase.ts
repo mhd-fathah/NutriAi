@@ -8,7 +8,7 @@ import { NutritionFallbackService } from '../../../infrastructure/services/nutri
 import * as crypto from 'crypto';
 
 @Injectable()
-export class UploadMealUseCase {
+export class AnalyzeMealUseCase {
   constructor(
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
@@ -60,12 +60,7 @@ export class UploadMealUseCase {
       const cacheDuration = Date.now() - cacheStartTime;
       console.log(`[AI CACHE] Cache Hit | Hash: ${imageHash} | Duration: ${cacheDuration}ms`);
       
-      // Invalidate user dashboard cache so that the new meal displays immediately
-      this.cacheService.delete(`dashboard_${userId}`);
-      
-      // Save duplicate meal using cached values
-      const duplicateMeal = await this.mealRepository.create({
-        userId,
+      return {
         mealType,
         imageUrl: cachedMeal.imageUrl,
         foodName: cachedMeal.foodName,
@@ -85,9 +80,7 @@ export class UploadMealUseCase {
         aiStatus: cachedMeal.aiStatus,
         aiProvider: cachedMeal.aiProvider,
         imageHash: imageHash,
-      });
-
-      return duplicateMeal;
+      };
     }
 
     console.log(`[AI CACHE] Cache Miss | Calling Gemini`);
@@ -211,7 +204,6 @@ export class UploadMealUseCase {
     }
 
     const mealData = {
-      userId,
       mealType,
       imageUrl,
       foodName: nutrition.foodName,
@@ -232,17 +224,12 @@ export class UploadMealUseCase {
       aiProvider: nutrition.aiProvider,
       imageHash,
     };
-    console.log("MEAL_TO_SAVE", mealData);
-
-    // 6. Save meal to database
-    const meal = await this.mealRepository.create(mealData);
-    console.log("SAVED_MEAL", meal);
 
     // Increment rate limit count on successful new analysis
     rateLimitData.count += 1;
     this.cacheService.set(rateLimitKey, rateLimitData);
 
-    console.log("ACTION_RETURN", meal);
-    return meal;
+    console.log("ANALYSIS_RETURN", mealData);
+    return mealData;
   }
 }

@@ -28,12 +28,35 @@ export default function UploadPage() {
   const [result, setResult] = useState<MealRecord | null>(null);
   const [dragging, setDragging] = useState(false);
 
+  // Review & Confirmation specific states
+  const [saving, setSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
+
   // Compression specific states
   const [isCompressing, setIsCompressing] = useState(false);
   const [originalSize, setOriginalSize] = useState<number | null>(null);
   const [compressedSize, setCompressedSize] = useState<number | null>(null);
   const [compressionPercent, setCompressionPercent] = useState<number | null>(null);
   const [compressedFile, setCompressedFile] = useState<File | null>(null);
+
+  const resetUploadState = () => {
+    setSelectedFile(null);
+    setPreview(null);
+    setResult(null);
+    setCompressedFile(null);
+    setOriginalSize(null);
+    setCompressedSize(null);
+    setCompressionPercent(null);
+    setLoading(false);
+    setIsCompressing(false);
+    setIsSaved(false);
+    setSaving(false);
+    setShowDiscardModal(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleFileChange = async (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -107,7 +130,7 @@ export default function UploadPage() {
         reader.readAsDataURL(fileToUpload);
       });
 
-      const response = await mealService.createMeal(
+      const response = await mealService.analyzeMeal(
         mealType,
         base64Data,
         fileToUpload.type || "image/jpeg"
@@ -119,7 +142,7 @@ export default function UploadPage() {
         if (response.data.isEstimated) {
           toast.warning("AI service is currently busy. Estimated nutrition values have been used.");
         } else {
-          toast.success("Meal analyzed and saved!");
+          toast.success("Meal analyzed successfully! Please verify details and save.");
         }
       } else {
         const errMsg = response.error || "";
@@ -140,12 +163,49 @@ export default function UploadPage() {
     }
   };
 
+  const handleSaveMeal = async () => {
+    if (!result || saving) return;
+    setSaving(true);
+    try {
+      const response = await mealService.createMeal(result);
+      if (response.success) {
+        toast.success("Meal saved successfully!");
+        setIsSaved(true);
+      } else {
+        toast.error(response.error || "Failed to save meal. Please try again.");
+      }
+    } catch (err: any) {
+      toast.error(err?.error || "Something went wrong while saving. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (result) {
     console.log("FRONTEND_DATA", result);
     const meal = result;
     console.log("UI_IMAGE_URL", meal.imageUrl);
     return (
       <div className="max-w-2xl mx-auto animate-fade-in-up pb-10 space-y-8">
+        {/* REVIEW OR SUCCESS STATUS CARD */}
+        {isSaved ? (
+          <div className="bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-400 rounded-3xl p-5 flex items-center gap-3">
+            <CheckCircle className="w-6 h-6 text-emerald-500 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-bold">Meal Saved Successfully!</p>
+              <p className="text-xs opacity-90">This meal has been added to your history and dashboard.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 text-gray-800 dark:text-white rounded-3xl p-5 flex items-center gap-3 shadow-sm">
+            <span className="text-xl">📋</span>
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-zinc-50">Review Your Meal</p>
+              <p className="text-xs text-gray-500 dark:text-zinc-400 font-semibold">Please verify the AI analysis before saving.</p>
+            </div>
+          </div>
+        )}
+
         {/* RESULT HERO */}
         <div className="relative overflow-hidden rounded-3xl border border-emerald-500/10 shadow-2xl bg-slate-950">
           <div className="relative h-64 md:h-80 w-full overflow-hidden">
@@ -180,7 +240,7 @@ export default function UploadPage() {
                 {meal.mealType}
               </span>
               <span className="text-xs text-slate-400 font-semibold">
-                {new Date(meal.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {meal.createdAt ? new Date(meal.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black tracking-tight">{meal.foodName}</h1>
@@ -255,20 +315,73 @@ export default function UploadPage() {
           </div>
         )}
 
-        <div className="flex gap-4">
-          <Button
-            className="flex-1 py-3.5 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 active:scale-[0.98] transition-all"
-            onClick={() => setResult(null)}
-          >
-            Scan Another Meal
-          </Button>
-          <Button
-            className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white active:scale-[0.98] transition-all"
-            onClick={() => router.push("/dashboard")}
-          >
-            Go to Dashboard
-          </Button>
-        </div>
+        {isSaved ? (
+          <div className="flex gap-4">
+            <Button
+              className="flex-1 py-3.5 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 active:scale-[0.98] transition-all"
+              onClick={resetUploadState}
+            >
+              Scan Another Meal
+            </Button>
+            <Button
+              className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white active:scale-[0.98] transition-all"
+              onClick={() => router.push("/dashboard")}
+            >
+              Go to Dashboard
+            </Button>
+          </div>
+        ) : (
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              className="flex-1 py-3.5 rounded-2xl font-bold border-rose-500/20 hover:bg-rose-500/10 text-rose-500 active:scale-[0.98] transition-all"
+              disabled={saving}
+              onClick={() => setShowDiscardModal(true)}
+            >
+              Discard
+            </Button>
+            <Button
+              className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white active:scale-[0.98] transition-all"
+              disabled={saving}
+              onClick={handleSaveMeal}
+            >
+              {saving ? "Saving Meal..." : "Save Meal"}
+            </Button>
+          </div>
+        )}
+
+        {/* DISCARD CONFIRMATION MODAL */}
+        {showDiscardModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl space-y-6 animate-scale-in">
+              <div className="space-y-2 text-center">
+                <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto text-xl">
+                  ⚠️
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-zinc-50">Discard Analysis?</h3>
+                <p className="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed font-medium">
+                  This meal will not be saved to your history.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 transition-all"
+                  onClick={() => setShowDiscardModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-rose-500 hover:bg-rose-600 text-white transition-all shadow-lg shadow-rose-500/20"
+                  onClick={resetUploadState}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

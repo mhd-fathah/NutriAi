@@ -10,9 +10,10 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { CreateMealDto } from '../../common/dto/meals.dto';
+import { AnalyzeMealDto, SaveMealDto } from '../../common/dto/meals.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { UploadMealUseCase } from '../../application/use-cases/meals/upload-meal.usecase';
+import { AnalyzeMealUseCase } from '../../application/use-cases/meals/analyze-meal.usecase';
+import { SaveMealUseCase } from '../../application/use-cases/meals/save-meal.usecase';
 import { GetMealHistoryUseCase } from '../../application/use-cases/meals/get-meal-history.usecase';
 import { GetMealsPaginatedUseCase } from '../../application/use-cases/meals/get-meals-paginated.usecase';
 import { GetMealByIdUseCase } from '../../application/use-cases/meals/get-meal-by-id.usecase';
@@ -21,15 +22,21 @@ import { GetMealByIdUseCase } from '../../application/use-cases/meals/get-meal-b
 @Controller('meals')
 export class MealsController {
   constructor(
-    private readonly uploadMealUseCase: UploadMealUseCase,
+    private readonly analyzeMealUseCase: AnalyzeMealUseCase,
+    private readonly saveMealUseCase: SaveMealUseCase,
     private readonly getMealHistoryUseCase: GetMealHistoryUseCase,
     private readonly getMealsPaginatedUseCase: GetMealsPaginatedUseCase,
     private readonly getMealByIdUseCase: GetMealByIdUseCase,
   ) {}
 
+  @Post('analyze')
+  async analyzeMeal(@Request() req, @Body() analyzeMealDto: AnalyzeMealDto) {
+    return this.analyzeMealUseCase.execute(req.user.id, analyzeMealDto);
+  }
+
   @Post()
-  async createMeal(@Request() req, @Body() createMealDto: CreateMealDto) {
-    return this.uploadMealUseCase.execute(req.user.id, createMealDto);
+  async createMeal(@Request() req, @Body() saveMealDto: SaveMealDto) {
+    return this.saveMealUseCase.execute(req.user.id, saveMealDto);
   }
 
   @Get('history')

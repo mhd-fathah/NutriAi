@@ -6,7 +6,8 @@ import { CloudinaryService } from '../../infrastructure/services/cloudinary.serv
 import { MealsController } from './meals.controller';
 import { GeminiModule } from '../gemini/gemini.module';
 import { UsersModule } from '../users/users.module';
-import { UploadMealUseCase } from '../../application/use-cases/meals/upload-meal.usecase';
+import { AnalyzeMealUseCase } from '../../application/use-cases/meals/analyze-meal.usecase';
+import { SaveMealUseCase } from '../../application/use-cases/meals/save-meal.usecase';
 import { GetMealHistoryUseCase } from '../../application/use-cases/meals/get-meal-history.usecase';
 import { GetMealsPaginatedUseCase } from '../../application/use-cases/meals/get-meals-paginated.usecase';
 import { GetMealByIdUseCase } from '../../application/use-cases/meals/get-meal-by-id.usecase';
@@ -22,7 +23,8 @@ import { NutritionFallbackService } from '../../infrastructure/services/nutritio
   controllers: [MealsController],
   providers: [
     CloudinaryService,
-    UploadMealUseCase,
+    AnalyzeMealUseCase,
+    SaveMealUseCase,
     GetMealHistoryUseCase,
     GetMealsPaginatedUseCase,
     GetMealByIdUseCase,
@@ -34,7 +36,8 @@ import { NutritionFallbackService } from '../../infrastructure/services/nutritio
   ],
   exports: [
     'IMealRepository',
-    UploadMealUseCase,
+    AnalyzeMealUseCase,
+    SaveMealUseCase,
     GetMealHistoryUseCase,
     GetMealsPaginatedUseCase,
     GetMealByIdUseCase,

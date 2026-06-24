@@ -66,31 +66,12 @@ const NUTRITION_RESPONSE_SCHEMA = {
 const COACHING_RESPONSE_SCHEMA = {
   type: 'object',
   properties: {
-    summary: { type: 'string' },
-    recommendations: {
+    insights: {
       type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          category: {
-            type: 'string',
-            enum: [
-              'Protein Boost',
-              'Calorie Boost',
-              'Weight Loss Tip',
-              'Healthy Snack Suggestion',
-              'Hydration Tip',
-              'General Coaching',
-            ],
-          },
-          text: { type: 'string' },
-          why: { type: 'string' },
-        },
-        required: ['category', 'text', 'why'],
-      },
+      items: { type: 'string' },
     },
   },
-  required: ['summary', 'recommendations'],
+  required: ['insights'],
 };
 
 @Injectable()
@@ -432,44 +413,27 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
       gain_weight: 'Gain Weight',
     };
 
-    const prompt = `You are a certified nutrition coach. Analyze the user's details, nutrition targets, and current intake.
-Calculate deficiencies and excesses.
-Provide practical food recommendations with quantities.
-Be concise and actionable.
+    const calDiff = context.todayConsumption.calories - context.user.dailyCalories;
+    const protDiff = context.todayConsumption.protein - context.user.dailyProtein;
+    const fatDiff = context.todayConsumption.fat - context.user.dailyFat;
 
-User Profile:
-- Age: ${context.user.age || 'N/A'}
-- Gender: ${context.user.gender || 'N/A'}
-- Weight: ${context.user.weight || 'N/A'} kg
-- Height: ${context.user.height || 'N/A'} cm
-- Goal: ${goalLabels[context.user.goal] || context.user.goal}
-- Target Calories: ${context.user.dailyCalories} kcal
-- Target Protein: ${context.user.dailyProtein}g
-- Target Carbs: ${context.user.dailyCarbs}g
-- Target Fat: ${context.user.dailyFat}g
+    const prompt = `You are a concise nutrition coach. Return EXACTLY 3 short insights as a JSON object { "insights": ["...", "...", "..."] }.
 
-Today's Consumption:
-- Calories: ${context.todayConsumption.calories} kcal
-- Protein: ${context.todayConsumption.protein}g
-- Carbs: ${context.todayConsumption.carbs}g
-- Fat: ${context.todayConsumption.fat}g
-- Sugar: ${context.todayConsumption.sugar}g
+RULES:
+- Each insight must be ONE sentence, maximum 120 characters.
+- Start each insight with a relevant emoji (⚠️, ✅, 🥩, 🍞, 🍟, 💧, 🎯, 🔥, 🍭).
+- Include real numbers from the data (e.g. "You are 340 kcal above target").
+- Be specific and actionable. No generic advice.
+- No sub-bullets. No long paragraphs. One insight per string.
 
-Today's Meals:
-${context.mealHistory.map((m) => `- [${m.mealType.toUpperCase()}] ${m.foodName} (${m.calories} kcal)`).join('\n')}
+User Goal: ${goalLabels[context.user.goal] || context.user.goal}
+Calorie Balance: ${calDiff > 0 ? '+' : ''}${calDiff.toFixed(0)} kcal vs target (${context.user.dailyCalories} kcal)
+Protein Balance: ${protDiff > 0 ? '+' : ''}${protDiff.toFixed(0)}g vs target (${context.user.dailyProtein}g)
+Fat Balance: ${fatDiff > 0 ? '+' : ''}${fatDiff.toFixed(0)}g vs target (${context.user.dailyFat}g)
+Sugar consumed: ${context.todayConsumption.sugar}g
+Meals today: ${context.mealHistory.map((m) => m.foodName).join(', ') || 'None'}
 
-Quality Rules:
-1. Be specific. Mention exact foods and approximate quantities.
-2. Reference the user's deficits or excesses in targets (e.g. if they are 90g below protein target, suggest Chicken Breast, Eggs, Milk, Greek Yogurt with quantities).
-3. Do not give generic advice like "Protein intake is low" or "Add more protein". State the actual deficit and recommended foods.
-4. Categorize each recommendation precisely. Supported categories:
-   - 'Protein Boost' (if protein deficit is high)
-   - 'Calorie Boost' (if calorie deficit is high)
-   - 'Weight Loss Tip' (if user's goal is lose_weight)
-   - 'Healthy Snack Suggestion' (general nutrient-dense snacks)
-   - 'Hydration Tip' (liquids/water/fluids suggestion)
-   - 'General Coaching' (any other tips)
-`;
+Return ONLY the JSON object. No markdown, no extra text.`;
 
     const retryOptions = {
       maxAttempts: 2,
@@ -505,35 +469,18 @@ Quality Rules:
           `GeminiPersonalizedCoaching-${modelName}`,
         );
 
-        if (result && result.recommendations && result.recommendations.length > 0) {
-          return [JSON.stringify(result)];
+        if (result && result.insights && result.insights.length > 0) {
+          return result.insights as string[];
         }
       } catch (e) {
         this.logger.error(`Personalized coaching tips generation with ${modelName} failed: ${e.message}`);
       }
     }
 
-    const defaultFallback: PersonalizedCoaching = {
-      summary: 'Stay consistent on your goals and keep tracking your meals.',
-      recommendations: [
-        {
-          category: 'General Coaching',
-          text: 'Include a variety of protein sources in your diet like chicken breast, fish, or eggs.',
-          why: 'To support daily muscle maintenance and satiety.',
-        },
-        {
-          category: 'Hydration Tip',
-          text: 'Aim to drink at least 8 glasses of water today.',
-          why: 'To optimize metabolism, hydration, and digestion.',
-        },
-        {
-          category: 'Healthy Snack Suggestion',
-          text: 'Try having a handful of almonds (30g) or fruit as an afternoon snack.',
-          why: 'For healthy fats, vitamins, and sustainable energy.',
-        },
-      ],
-    };
-
-    return [JSON.stringify(defaultFallback)];
+    return [
+      '✅ Keep tracking your meals to hit your daily calorie target.',
+      '🥩 Include a protein source (chicken, eggs, or Greek yogurt) in your next meal.',
+      '💧 Drink at least 8 glasses of water today to stay hydrated.',
+    ];
   }
 }
