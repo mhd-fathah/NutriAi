@@ -1,25 +1,30 @@
-# 🥗 NutriAI - AI Powered Nutrition Tracking App
+# 🥗 NutriAI
 
-NutriAI is a modern AI-powered nutrition tracking web application that helps users analyze meals, track calories, monitor macronutrients, and receive personalized nutrition insights using image recognition powered by Google Gemini AI.
+AI-Powered Nutrition Tracking & Food Analysis Platform
 
-Built with Next.js 15, TypeScript, MongoDB Atlas, NextAuth, Tailwind CSS, and Gemini Vision AI.
+NutriAI is a modern full-stack nutrition tracking application that helps users analyze meals using AI, track daily nutrition, monitor calorie goals, and receive personalized nutrition recommendations.
+
+Built with a scalable architecture using Next.js, NestJS, MongoDB, Gemini Vision AI, and Clean Architecture principles.
 
 ---
 
-## 🚀 Features
+# 🚀 Features
 
-### 🔐 Authentication
+## Authentication
 
 * Email & Password Authentication
 * Google Authentication
-* Secure session management using NextAuth/Auth.js
-* Protected routes
-* Auto onboarding for new users
+* Secure JWT Authentication
+* Protected Routes
+* Session Management
 
-### 👤 User Onboarding
+---
+
+## User Onboarding
 
 Collects:
 
+* Name
 * Age
 * Gender
 * Height
@@ -29,20 +34,21 @@ Collects:
 Automatically calculates:
 
 * BMI
-* Recommended Goal
+* Nutrition Goal
 * Daily Calories
 * Daily Protein
-* Daily Carbs
+* Daily Carbohydrates
 * Daily Fat
 
 ---
 
-## 🤖 AI Food Recognition
+## AI Food Recognition
 
 Upload a food image and NutriAI will:
 
-* Identify food items
-* Estimate serving weight
+* Detect food items
+* Estimate serving size
+* Estimate weight
 * Calculate calories
 * Calculate protein
 * Calculate carbohydrates
@@ -51,33 +57,38 @@ Upload a food image and NutriAI will:
 
 Powered by:
 
-* Google Gemini 2.5 Flash Vision
-
-Example:
-
-```json
-{
-  "foodName": "Chicken Biryani",
-  "estimatedWeight": 450,
-  "calories": 780,
-  "protein": 35,
-  "carbs": 85,
-  "fat": 25,
-  "sugar": 5
-}
-```
+* Google Gemini Vision AI
 
 ---
 
-## 📊 Dashboard Analytics
+## AI Nutrition Coach
 
-Dashboard includes:
+Provides personalized recommendations based on:
+
+* Daily calorie target
+* Consumed calories
+* Protein intake
+* Macronutrient balance
+* User goal
+
+Examples:
+
+* Increase protein intake
+* Reduce excess calories
+* Improve meal balance
+* Hydration reminders
+
+---
+
+## Dashboard
+
+Features:
 
 ### Daily Progress
 
-* Daily calorie target
-* Progress ring
-* Remaining calories
+* Calorie Progress Ring
+* Remaining Calories
+* Daily Targets
 
 ### Nutrition Tracking
 
@@ -87,137 +98,183 @@ Dashboard includes:
 * Fat
 * Sugar
 
-### AI Nutrition Coach
+### AI Insights
 
-Provides personalized nutrition recommendations based on:
-
-* Daily target
-* Consumed meals
-* Nutrition intake
+* Personalized Nutrition Tips
+* Goal Tracking
+* Daily Recommendations
 
 ### Weekly Analytics
 
 * Calories Trend Chart
 * Macronutrient Distribution
-* Weekly Nutrition Summary
-
-Built using:
-
-* Recharts
+* Weekly Nutrition Overview
 
 ---
 
-## 📚 Meal History
+## Meal Upload
+
+Users can:
+
+* Select meal type
+* Upload food image
+* Analyze meal using AI
+* Review AI results
+* Save meal
+* Discard meal
+
+Supported meal types:
+
+* Breakfast
+* Lunch
+* Dinner
+* Snacks
+
+---
+
+## Meal History
 
 Track nutrition history by:
 
 ### Daily
 
-View today's meals
+View meals consumed today.
 
 ### Weekly
 
-View weekly nutrition trends
+View nutrition trends for the current week.
 
 ### Monthly
 
-View monthly nutrition performance
-
-Includes:
-
-* Meal images
-* Meal types
-* Calories
-* Protein
-* Carbs
-* Fat
-* Consumption timestamps
+View monthly nutrition performance.
 
 ---
 
-## 🌗 Theme Support
-
-### Light Mode
-
-Clean and modern health-focused design.
-
-### Dark Mode
-
-Fully optimized dark experience with:
-
-* Dark surfaces
-* Dark analytics
-* Dark forms
-* Dark navigation
-* Dark charts
+## Dark Mode
 
 Supports:
 
-* Light
-* Dark
+* Light Mode
+* Dark Mode
 * System Theme
+
+Fully optimized dark experience.
 
 ---
 
-## 📱 Progressive Web App (PWA)
+## Progressive Web App (PWA)
 
-NutriAI can be installed as a mobile application.
+Installable on:
+
+* Android
+* iPhone
+* Desktop
 
 Features:
 
-* Home screen installation
 * Offline support
+* Home screen installation
 * Splash screen
-* App icons
-* Full-screen experience
-* Mobile-friendly design
-
-Supported on:
-
-* Android
-* iOS
-* Desktop
+* App-like experience
 
 ---
 
-## 🏗️ Architecture
+# 🏗 Architecture
 
-The project follows Clean Architecture principles.
+The project follows:
+
+* Clean Architecture
+* Repository Pattern
+* SOLID Principles
+
+---
+
+## Backend Flow
 
 ```text
-src
-│
-├── app
-│
-├── actions
-│
-├── components
-│   ├── analytics
-│   ├── auth
-│   ├── dashboard
-│   ├── upload
-│   └── shared
-│
-├── lib
-│   ├── calculations
-│   ├── mongodb
-│   ├── gemini
-│   └── validations
-│
-├── models
-│
-├── types
-│
-├── constants
-│
-└── utils
+Controller
+↓
+Use Case / Service
+↓
+Repository
+↓
+MongoDB
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## AI Flow
 
-### Frontend
+```text
+Food Image
+↓
+Gemini Vision
+↓
+Food Detection
+↓
+Nutrition Analysis
+↓
+Confidence Scoring
+↓
+Review Screen
+↓
+User Confirmation
+↓
+Database Save
+```
+
+---
+
+# 📂 Project Structure
+
+## Frontend
+
+```text
+nutriai-client/
+
+src
+├── app
+├── components
+├── services
+├── hooks
+├── lib
+├── types
+├── utils
+├── constants
+└── providers
+```
+
+---
+
+## Backend
+
+```text
+nutriai-server/
+
+src
+
+├── modules
+│   ├── auth
+│   ├── users
+│   ├── meals
+│   ├── analytics
+│   └── ai
+│
+├── repositories
+├── services
+├── controllers
+├── dto
+├── schemas
+├── interfaces
+├── common
+└── config
+```
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
 
 * Next.js 15
 * TypeScript
@@ -225,39 +282,63 @@ src
 * React Hook Form
 * Zod
 * Recharts
-* Lucide React
-
-### Backend
-
-* Next.js Server Actions
-* MongoDB Atlas
-* Mongoose
-
-### Authentication
-
-* NextAuth/Auth.js
-* Google OAuth
-* Credentials Authentication
-
-### AI
-
-* Google Gemini 2.5 Flash Vision
-
-### Deployment
-
-* Vercel
+* Next Themes
+* Axios
 
 ---
 
-## 🧮 Nutrition Calculations
+## Backend
 
-### BMI Formula
+* NestJS
+* TypeScript
+* JWT Authentication
+* Repository Pattern
+* Clean Architecture
+
+---
+
+## Database
+
+* MongoDB Atlas
+* Mongoose
+
+---
+
+## AI
+
+* Google Gemini Vision
+
+---
+
+## Storage
+
+* Cloudinary
+
+---
+
+## Deployment
+
+### Frontend
+
+* Vercel
+
+### Backend
+
+* Render
+
+---
+
+# 🧮 Nutrition Calculations
+
+## BMI Formula
 
 ```text
 BMI = weight / (height / 100)^2
 ```
 
-### BMI Categories
+---
+
+## BMI Categories
 
 | BMI         | Category    |
 | ----------- | ----------- |
@@ -268,164 +349,178 @@ BMI = weight / (height / 100)^2
 
 ---
 
-### Goal Recommendation
+## Goal Recommendation
 
-```text
-BMI < 18.5
-→ Gain Weight
+### Underweight
 
-BMI 18.5 - 24.9
-→ Maintain Weight
+Gain Weight
 
-BMI > 25
-→ Lose Weight
-```
+### Normal
+
+Maintain Weight
+
+### Overweight
+
+Lose Weight
 
 ---
 
-### Daily Calories
+## Daily Calories
 
-Uses:
+Calculated using:
 
 Mifflin-St Jeor Formula
 
-#### Male
+### Male
 
 ```text
-BMR =
 10 × weight +
 6.25 × height -
 5 × age +
 5
 ```
 
-#### Female
+### Female
 
 ```text
-BMR =
 10 × weight +
 6.25 × height -
 5 × age -
 161
 ```
 
-Then multiplied by activity level.
+Adjusted using activity level.
 
 ---
 
-## ⚙️ Environment Variables
+# 🔒 Security Features
 
-Create:
-
-```bash
-.env.local
-```
-
-Add:
-
-```env
-# MongoDB Atlas
-MONGODB_URI=
-
-# NextAuth
-NEXTAUTH_SECRET=
-AUTH_SECRET=
-NEXTAUTH_URL=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-# Gemini AI (https://aistudio.google.com/apikey)
-GEMINI_API_KEY=
-
-# Cloudinary (https://cloudinary.com/console)
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-
-```
+* JWT Authentication
+* Password Hashing
+* Protected Routes
+* Input Validation
+* DTO Validation
+* Rate Limiting
+* Secure API Communication
 
 ---
 
-## 🚀 Installation
+# ⚡ Performance Optimizations
 
-### Clone Repository
+* Image Compression Before Upload
+* Gemini Response Caching
+* MongoDB Indexing
+* Aggregation Pipelines
+* React Memoization
+* Lazy Loading
+* Optimized API Calls
+* PWA Support
+
+---
+
+# 🌟 Key Improvements
+
+### AI Analysis Review
+
+Meals are not saved automatically.
+
+Users can:
+
+* Save Meal
+* Discard Meal
+
+before storing data.
+
+---
+
+### AI Confidence Score
+
+Each analysis includes:
+
+* Confidence Rating
+* Provider Information
+* Nutrition Validation
+
+---
+
+### Smart Fallback System
+
+If AI is unavailable:
+
+* Rule-based nutrition estimation
+* Graceful degradation
+
+---
+
+# 📦 Installation
+
+## Frontend
 
 ```bash
-git clone https://github.com/mhd-fathah/NutriAi.git
-```
+git clone <repository-url>
 
-```bash
-cd nutriai
-```
+cd nutriai-client
 
-### Install Dependencies
-
-```bash
 npm install
-```
 
-### Configure Environment Variables
-
-Create:
-
-```bash
-.env.local
-```
-
-### Run Development Server
-
-```bash
 npm run dev
 ```
 
-Application:
+---
 
-```text
-http://localhost:3000
+## Backend
+
+```bash
+cd nutriai-server
+
+npm install
+
+npm run start:dev
 ```
 
 ---
 
-## 📦 Build
+# 🔧 Environment Variables
 
-```bash
-npm run build
-```
+## Frontend
 
-```bash
-npm start
+```env
+NEXT_PUBLIC_API_URL=
+NEXT_PUBLIC_APP_URL=
 ```
 
 ---
 
-## 🌍 Deployment
+## Backend
 
-Recommended:
+```env
+MONGODB_URI=
 
-### Vercel
+JWT_SECRET=
 
-```bash
-vercel
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+GEMINI_API_KEY=
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 ```
-
-Configure:
-
-* MongoDB Atlas
-* Gemini API Key
-* Google OAuth
-* Cloudinary
-
-Environment variables in Vercel Dashboard.
 
 ---
 
-## 👨‍💻 Author
+
+# 👨‍💻 Author
 
 Muhammed Fathah
 
 Full Stack Developer
 
+Tech Stack:
+
 * Next.js
+* NestJS
 * TypeScript
 * MongoDB
 * AI Integrations
@@ -433,10 +528,10 @@ Full Stack Developer
 
 ---
 
-## 📄 License
+# 📄 License
 
-This project is built for educational and portfolio purposes.
+This project is created for educational, portfolio, and technical evaluation purposes.
 
 ---
 
-### ⭐ If you found this project useful, please consider starring the repository.
+⭐ If you found this project useful, consider giving it a star.
