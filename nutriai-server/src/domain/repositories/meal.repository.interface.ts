@@ -14,4 +14,5 @@ export interface IMealRepository {
     skip: number,
   ): Promise<{ meals: MealEntity[]; total: number }>;
   deleteById(id: string): Promise<MealEntity | null>;
+  findByImageHash(imageHash: string): Promise<MealEntity | null>;
 }

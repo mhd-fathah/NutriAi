@@ -1,12 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
-export class CloudinaryService {
+export class CloudinaryService implements OnModuleInit {
   private readonly logger = new Logger(CloudinaryService.name);
   private isConfigured = false;
+  private isValid = false;
 
-  private configure() {
+  async onModuleInit() {
+    try {
+      await this.configure();
+    } catch (err: any) {
+      this.logger.error(`Cloudinary startup validation failed: ${err.message}`);
+      throw err;
+    }
+  }
+
+  private async configure() {
     if (this.isConfigured) return;
 
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -14,12 +24,11 @@ export class CloudinaryService {
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {
-      this.logger.warn(
-        `Cloudinary is not fully configured. Missing credentials. ` +
+      this.logger.error(
+        `Cloudinary Configuration Invalid: Missing credentials. ` +
         `CLOUDINARY_CLOUD_NAME: ${cloudName ? 'OK' : 'MISSING'}, ` +
         `CLOUDINARY_API_KEY: ${apiKey ? 'OK' : 'MISSING'}, ` +
-        `CLOUDINARY_API_SECRET: ${apiSecret ? 'PRESENT' : 'MISSING'}. ` +
-        `Image uploads will fallback to Base64 data URIs.`
+        `CLOUDINARY_API_SECRET: ${apiSecret ? 'PRESENT' : 'MISSING'}.`
       );
       throw new Error('Cloudinary credentials are not properly configured.');
     }
@@ -31,10 +40,17 @@ export class CloudinaryService {
         api_secret: apiSecret,
         secure: true,
       });
+
+      // Perform diagnostic ping check to verify credentials validity
+      await cloudinary.api.ping();
+
       this.isConfigured = true;
-    } catch (configError) {
-      this.logger.error(`Failed to configure Cloudinary SDK: ${configError.message}`);
-      throw configError;
+      this.isValid = true;
+      this.logger.log('Cloudinary Connected');
+    } catch (configError: any) {
+      this.isConfigured = true;
+      this.isValid = false;
+      this.logger.error(`Cloudinary Configuration Invalid: ${configError.message}`);
     }
   }
 
@@ -42,7 +58,13 @@ export class CloudinaryService {
     base64Data: string,
     mimeType: string = 'image/jpeg',
   ): Promise<{ url: string; publicId: string }> {
-    this.configure();
+    if (!this.isConfigured) {
+      await this.configure();
+    }
+    if (!this.isValid) {
+      throw new Error('Cloudinary uploads are disabled because the configuration is invalid.');
+    }
+
     const dataUri = `data:${mimeType};base64,${base64Data}`;
     try {
       this.logger.log('Uploading meal image to Cloudinary...');
@@ -73,7 +95,13 @@ export class CloudinaryService {
 
   async deleteImage(publicId: string): Promise<void> {
     try {
-      this.configure();
+      if (!this.isConfigured) {
+        await this.configure();
+      }
+      if (!this.isValid) {
+        this.logger.warn('Cloudinary delete skipped: invalid configuration.');
+        return;
+      }
       this.logger.log(`Deleting image from Cloudinary: ${publicId}`);
       await cloudinary.uploader.destroy(publicId);
     } catch (error: any) {

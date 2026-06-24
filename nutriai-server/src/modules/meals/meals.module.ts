@@ -11,6 +11,8 @@ import { GetMealHistoryUseCase } from '../../application/use-cases/meals/get-mea
 import { GetMealsPaginatedUseCase } from '../../application/use-cases/meals/get-meals-paginated.usecase';
 import { GetMealByIdUseCase } from '../../application/use-cases/meals/get-meal-by-id.usecase';
 
+import { NutritionFallbackService } from '../../infrastructure/services/nutrition-fallback.service';
+
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Meal.name, schema: MealSchema }]),
@@ -24,6 +26,7 @@ import { GetMealByIdUseCase } from '../../application/use-cases/meals/get-meal-b
     GetMealHistoryUseCase,
     GetMealsPaginatedUseCase,
     GetMealByIdUseCase,
+    NutritionFallbackService,
     {
       provide: 'IMealRepository',
       useClass: MongoMealRepository,
@@ -35,6 +38,7 @@ import { GetMealByIdUseCase } from '../../application/use-cases/meals/get-meal-b
     GetMealHistoryUseCase,
     GetMealsPaginatedUseCase,
     GetMealByIdUseCase,
+    NutritionFallbackService,
     MongooseModule.forFeature([{ name: Meal.name, schema: MealSchema }]),
   ],
 })

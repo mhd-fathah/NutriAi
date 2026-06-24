@@ -80,12 +80,14 @@ export default function UploadPage() {
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    if (loading || isCompressing) return;
     setDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) handleFileChange(file);
-  }, []);
+  }, [loading, isCompressing]);
 
   const handleAnalyze = async () => {
+    if (loading || isCompressing) return;
     const fileToUpload = compressedFile || selectedFile;
     if (!fileToUpload) {
       toast.error("Please select a meal image");
@@ -292,12 +294,14 @@ export default function UploadPage() {
               <button
                 key={value}
                 type="button"
+                disabled={loading || isCompressing}
                 onClick={() => setMealType(value)}
                 className={cn(
                   "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-300 active:scale-[0.97]",
                   mealType === value
                     ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/5 text-emerald-700 dark:text-emerald-400"
-                    : "border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 text-gray-600 dark:text-zinc-400 bg-white dark:bg-zinc-900"
+                    : "border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 text-gray-600 dark:text-zinc-400 bg-white dark:bg-zinc-900",
+                  (loading || isCompressing) && "opacity-50 cursor-not-allowed pointer-events-none"
                 )}
               >
                 <span className="text-2xl transition-transform duration-300 hover:scale-110">{icon}</span>
@@ -309,14 +313,15 @@ export default function UploadPage() {
 
         {/* SECTION 3 & 4: UPLOAD AREA / IMAGE PREVIEW */}
         <div
-          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragOver={(e) => { e.preventDefault(); if (!loading && !isCompressing) setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          onClick={() => !preview && !isCompressing && fileInputRef.current?.click()}
+          onClick={() => !preview && !isCompressing && !loading && fileInputRef.current?.click()}
           className={cn(
             "relative border-2 border-dashed rounded-3xl transition-all duration-300 overflow-hidden",
             preview ? "border-transparent shadow-md" : "cursor-pointer border-gray-200 dark:border-zinc-800 hover:border-emerald-400 dark:hover:border-emerald-500/30 hover:bg-emerald-500/[0.01]",
-            dragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10" : ""
+            dragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10" : "",
+            (loading || isCompressing) && "pointer-events-none opacity-50"
           )}
         >
           {isCompressing ? (
@@ -351,6 +356,7 @@ export default function UploadPage() {
 
               <button
                 type="button"
+                disabled={loading || isCompressing}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedFile(null);
@@ -360,7 +366,10 @@ export default function UploadPage() {
                   setCompressedSize(null);
                   setCompressionPercent(null);
                 }}
-                className="absolute top-4 right-4 w-9 h-9 bg-black/60 hover:bg-black/80 hover:scale-105 text-white rounded-full flex items-center justify-center transition-all shadow-md active:scale-95"
+                className={cn(
+                  "absolute top-4 right-4 w-9 h-9 bg-black/60 hover:bg-black/80 hover:scale-105 text-white rounded-full flex items-center justify-center transition-all shadow-md active:scale-95",
+                  (loading || isCompressing) && "opacity-50 pointer-events-none"
+                )}
               >
                 <X size={16} />
               </button>
@@ -425,6 +434,7 @@ export default function UploadPage() {
         {!preview && !isCompressing && (
           <Button
             variant="outline"
+            disabled={loading || isCompressing}
             className="w-full py-3.5 rounded-2xl font-bold border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.99] transition-all"
             onClick={() => fileInputRef.current?.click()}
           >

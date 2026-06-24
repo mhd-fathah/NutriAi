@@ -6,6 +6,21 @@ export interface RetryOptions {
   useJitter: boolean;
 }
 
+export function isQuotaError(status: number | null, message: string = ''): boolean {
+  if (status === 429) {
+    return true;
+  }
+  const lowerMsg = message.toLowerCase();
+  if (
+    lowerMsg.includes('quota exceeded') ||
+    lowerMsg.includes('too many requests') ||
+    lowerMsg.includes('rate limit exceeded')
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   options: RetryOptions,
@@ -20,6 +35,15 @@ export async function retryWithBackoff<T>(
       return await fn();
     } catch (error: any) {
       const status = getErrorStatusCode(error);
+      
+      if (isQuotaError(status, error.message)) {
+        if (logger) {
+          logger.error(`[${contextName}] Quota/Rate Limit exceeded (Status: ${status}). Failing fast without retries.`);
+        }
+        error.isQuotaExceeded = true;
+        throw error;
+      }
+
       const isTransient = isTransientError(status, error.message);
 
       if (!isTransient || attempt === maxAttempts) {
@@ -59,7 +83,7 @@ export async function retryWithBackoff<T>(
   throw new Error('Retry loop exited unexpectedly');
 }
 
-function getErrorStatusCode(error: any): number | null {
+export function getErrorStatusCode(error: any): number | null {
   if (error.status) return error.status;
   // Parse status code from GoogleGenerativeAI Error message string like "[503 Service Unavailable]"
   const match = error.message?.match(/\[(\d{3})\s+[^\]]+\]/);
@@ -70,14 +94,12 @@ function getErrorStatusCode(error: any): number | null {
 }
 
 function isTransientError(status: number | null, message: string = ''): boolean {
-  if (status === 503 || status === 429 || status === 408) {
+  if (status === 503 || status === 408) {
     return true;
   }
   const lowerMsg = message.toLowerCase();
   if (
     lowerMsg.includes('high demand') ||
-    lowerMsg.includes('quota exceeded') ||
-    lowerMsg.includes('too many requests') ||
     lowerMsg.includes('timeout') ||
     lowerMsg.includes('service unavailable') ||
     lowerMsg.includes('econnreset') ||

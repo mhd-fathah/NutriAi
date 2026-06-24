@@ -31,7 +31,8 @@ export class MealEntity {
   aiTips: string[];
   isEstimated: boolean;
   aiStatus: 'success' | 'fallback';
-  aiProvider: 'gemini' | 'local';
+  aiProvider: 'gemini' | 'local' | 'fallback';
+  imageHash?: string;
   createdAt?: Date;
 
   constructor(partial: Partial<MealEntity>) {

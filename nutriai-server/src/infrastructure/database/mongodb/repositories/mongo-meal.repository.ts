@@ -47,6 +47,7 @@ export class MongoMealRepository implements IMealRepository {
       isEstimated: doc.isEstimated,
       aiStatus: doc.aiStatus,
       aiProvider: doc.aiProvider,
+      imageHash: doc.imageHash,
       createdAt: doc.createdAt,
     });
   }
@@ -109,5 +110,10 @@ export class MongoMealRepository implements IMealRepository {
       this.cacheService.delete(`dashboard_${deleted.userId.toString()}`);
     }
     return this.mapToEntity(deleted);
+  }
+
+  async findByImageHash(imageHash: string): Promise<MealEntity | null> {
+    const meal = await this.mealModel.findOne({ imageHash }).lean().exec();
+    return this.mapToEntity(meal);
   }
 }

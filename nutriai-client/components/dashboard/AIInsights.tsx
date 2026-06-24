@@ -27,7 +27,7 @@ const getCategoryStyles = (category: string) => {
   switch (category) {
     case "Protein Boost":
       return {
-        bg: "bg-purple-55 bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-100 dark:border-purple-900/30",
+        bg: "bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-100 dark:border-purple-900/30",
         icon: <Award className="w-3.5 h-3.5" />,
       };
     case "Calorie Boost":
@@ -92,7 +92,7 @@ function AIInsights({ tips, hasData }: AIInsightsProps) {
       <div className="space-y-4">
         {/* SUMMARY CARD */}
         <div className="p-4 bg-emerald-50/40 dark:bg-emerald-950/10 rounded-2xl border border-emerald-100/40 dark:border-emerald-900/10">
-          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-350 flex items-start gap-2">
+          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400 flex items-start gap-2">
             <Sparkles className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" />
             <span>{parsedCoaching.summary}</span>
           </p>

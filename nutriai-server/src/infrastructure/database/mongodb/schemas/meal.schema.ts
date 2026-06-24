@@ -96,8 +96,11 @@ export class Meal {
   @Prop({ enum: ['success', 'fallback'], default: 'success' })
   aiStatus: 'success' | 'fallback';
 
-  @Prop({ enum: ['gemini', 'local'], default: 'gemini' })
-  aiProvider: 'gemini' | 'local';
+  @Prop({ enum: ['gemini', 'local', 'fallback'], default: 'gemini' })
+  aiProvider: 'gemini' | 'local' | 'fallback';
+
+  @Prop({ index: true })
+  imageHash?: string;
 
   createdAt: Date;
 }

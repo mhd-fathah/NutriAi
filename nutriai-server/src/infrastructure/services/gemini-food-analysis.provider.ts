@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { IFoodAnalysisProvider } from '../../domain/providers/food-analysis-provider.interface';
-import { retryWithBackoff } from '../../common/utils/retry.util';
+import { retryWithBackoff, isQuotaError, getErrorStatusCode } from '../../common/utils/retry.util';
 import { extractJSON } from '../../common/utils/json-extraction.util';
 import {
   MultiStageNutritionSchema,
@@ -295,8 +295,41 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
         aiStatus: 'success' as const,
         aiProvider: 'gemini' as const,
       };
-    } catch (primaryErr) {
+    } catch (primaryErr: any) {
       this.logger.error(`Primary model analysis failed: ${primaryErr.message}`);
+      const status = getErrorStatusCode(primaryErr);
+      if (primaryErr.isQuotaExceeded || isQuotaError(status, primaryErr.message)) {
+        this.logger.warn(`Primary model failed due to Quota/Rate Limit (Status: ${status}). Skipping fallback models to fail fast.`);
+        return {
+          foodName: 'Estimated Meal',
+          estimatedWeight: '250g',
+          calories: 500,
+          protein: 20,
+          carbs: 60,
+          fat: 15,
+          sugar: 5,
+          fiber: 4,
+          sodium: 600,
+          foods: [
+            {
+              name: 'Estimated Meal',
+              portion: 'Regular',
+              estimatedWeight: 250,
+              calories: 500,
+              protein: 20,
+              carbs: 60,
+              fat: 15,
+              sugar: 5,
+              fiber: 4,
+              sodium: 600,
+            },
+          ],
+          confidence: 50,
+          isEstimated: true,
+          aiStatus: 'fallback' as const,
+          aiProvider: 'local' as const,
+        };
+      }
     }
 
     // 2. Try Fallback Model
