@@ -8,6 +8,7 @@ import { mealService } from "@/services/meal.service";
 import { MealRecord, MealType } from "@/types";
 import { MEAL_TYPES } from "@/constants";
 import Button from "@/components/shared/Button";
+import AIInsights from "@/components/dashboard/AIInsights";
 import { Upload, X, Camera, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
 import { cn } from "@/utils";
 
@@ -27,7 +28,14 @@ export default function UploadPage() {
   const [result, setResult] = useState<MealRecord | null>(null);
   const [dragging, setDragging] = useState(false);
 
-  const handleFileChange = (file: File) => {
+  // Compression specific states
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [originalSize, setOriginalSize] = useState<number | null>(null);
+  const [compressedSize, setCompressedSize] = useState<number | null>(null);
+  const [compressionPercent, setCompressionPercent] = useState<number | null>(null);
+  const [compressedFile, setCompressedFile] = useState<File | null>(null);
+
+  const handleFileChange = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
@@ -36,12 +44,38 @@ export default function UploadPage() {
       toast.error("Image must be less than 10MB");
       return;
     }
+
     console.log("UPLOAD_FILE", file);
     setSelectedFile(file);
     setResult(null);
-    const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    setOriginalSize(file.size);
+    setIsCompressing(true);
+
+    try {
+      const { compressMealImage } = await import("@/lib/image/imageCompression");
+      const compressed = await compressMealImage(file);
+      
+      setCompressedFile(compressed);
+      setCompressedSize(compressed.size);
+      
+      const saved = Math.round((1 - compressed.size / file.size) * 100);
+      setCompressionPercent(saved > 0 ? saved : 0);
+
+      const reader = new FileReader();
+      reader.onload = () => setPreview(reader.result as string);
+      reader.readAsDataURL(compressed);
+    } catch (e) {
+      console.error("Compression utility error, falling back to original:", e);
+      setCompressedFile(file);
+      setCompressedSize(file.size);
+      setCompressionPercent(0);
+
+      const reader = new FileReader();
+      reader.onload = () => setPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -52,59 +86,15 @@ export default function UploadPage() {
   }, []);
 
   const handleAnalyze = async () => {
-    if (!selectedFile) {
+    const fileToUpload = compressedFile || selectedFile;
+    if (!fileToUpload) {
       toast.error("Please select a meal image");
       return;
     }
 
     setLoading(true);
     try {
-      // 8. Compress and resize image using HTML5 Canvas prior to upload
-      const compressedBlob = await new Promise<Blob>((resolve, reject) => {
-        const img = new window.Image();
-        img.src = URL.createObjectURL(selectedFile);
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          let width = img.width;
-          let height = img.height;
-          const maxDimension = 1024;
-
-          // Resize aspect ratio constraints
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = Math.round((height * maxDimension) / width);
-              width = maxDimension;
-            } else {
-              width = Math.round((width * maxDimension) / height);
-              height = maxDimension;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            return reject(new Error("Failed to get 2d context"));
-          }
-
-          ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                console.log(`[Image Compress] Original Size: ${(selectedFile.size / 1024).toFixed(2)} KB, Compressed Size: ${(blob.size / 1024).toFixed(2)} KB`);
-                resolve(blob);
-              } else {
-                reject(new Error("Canvas compression returned empty blob"));
-              }
-            },
-            "image/jpeg",
-            0.8
-          );
-        };
-        img.onerror = () => reject(new Error("Failed to load image element"));
-      });
-
-      // Convert compressed blob to base64
+      // Convert file to base64 for API delivery
       const base64Data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -112,13 +102,13 @@ export default function UploadPage() {
           resolve(base64String);
         };
         reader.onerror = reject;
-        reader.readAsDataURL(compressedBlob);
+        reader.readAsDataURL(fileToUpload);
       });
 
       const response = await mealService.createMeal(
         mealType,
         base64Data,
-        selectedFile.type || "image/jpeg"
+        fileToUpload.type || "image/jpeg"
       );
 
       if (response.success && response.data) {
@@ -180,123 +170,117 @@ export default function UploadPage() {
                 </div>
               )}
             </div>
-
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500 text-white uppercase tracking-wider">
-                  {mealType}
-                </span>
-                <span className="text-xs font-bold text-gray-300">
-                  {new Date(result.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              <h2 className="text-white text-3xl font-extrabold tracking-tight">{result.foodName}</h2>
-              <p className="text-gray-300 text-sm font-semibold">Weight: ~{result.estimatedWeight}</p>
-            </div>
           </div>
+          
+          <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+                {meal.mealType}
+              </span>
+              <span className="text-xs text-slate-400 font-semibold">
+                {new Date(meal.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight">{meal.foodName}</h1>
+            <p className="text-xs text-slate-400 font-semibold">Portion size: {meal.estimatedWeight}</p>
+          </div>
+        </div>
 
-          <div className="p-6 md:p-8 space-y-6 bg-white dark:bg-zinc-900">
-            {/* NUTRITION METRICS */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {[
-                { label: "Calories", value: result.calories, unit: "kcal", color: "rose", bg: "bg-rose-50/50 dark:bg-rose-950/20", border: "border-rose-100/50 dark:border-rose-900/30", text: "text-rose-700 dark:text-rose-400" },
-                { label: "Protein", value: result.protein, unit: "g", color: "emerald", bg: "bg-emerald-50/50 dark:bg-emerald-950/20", border: "border-emerald-100/50 dark:border-emerald-900/30", text: "text-emerald-700 dark:text-emerald-400" },
-                { label: "Carbs", value: result.carbs, unit: "g", color: "blue", bg: "bg-blue-50/50 dark:bg-blue-950/20", border: "border-blue-100/50 dark:border-blue-900/30", text: "text-blue-700 dark:text-blue-400" },
-                { label: "Fat", value: result.fat, unit: "g", color: "amber", bg: "bg-amber-50/50 dark:bg-amber-950/20", border: "border-amber-100/50 dark:border-amber-900/30", text: "text-amber-700 dark:text-amber-400" },
-                { label: "Sugar", value: result.sugar, unit: "g", color: "purple", bg: "bg-purple-50/50 dark:bg-purple-950/20", border: "border-purple-100/50 dark:border-purple-900/30", text: "text-purple-700 dark:text-purple-400" },
-              ].map(({ label, value, unit, bg, border, text }) => (
-                <div key={label} className={cn("rounded-2xl p-4 text-center border shadow-sm hover:-translate-y-0.5 transition-all duration-200", bg, border)}>
-                  <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold mb-1 uppercase tracking-wider">{label}</p>
-                  <p className={cn("text-2xl font-black leading-none", text)}>
-                    {Math.round(value)}
-                    <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500 ml-0.5">{unit}</span>
-                  </p>
+        {/* NUTRITION CARDS GRID */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
+            <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-bold tracking-wider mb-1">Calories</p>
+            <p className="text-2xl font-black text-gray-900 dark:text-zinc-100 leading-none">
+              {meal.calories}
+              <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500 ml-0.5">kcal</span>
+            </p>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
+            <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-bold tracking-wider mb-1">Protein</p>
+            <p className="text-2xl font-black text-purple-600 dark:text-purple-400 leading-none">
+              {meal.protein}
+              <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500 ml-0.5">g</span>
+            </p>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
+            <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-bold tracking-wider mb-1">Carbs</p>
+            <p className="text-2xl font-black text-blue-600 dark:text-blue-400 leading-none">
+              {meal.carbs}
+              <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500 ml-0.5">g</span>
+            </p>
+          </div>
+          <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
+            <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-bold tracking-wider mb-1">Fat</p>
+            <p className="text-2xl font-black text-amber-600 dark:text-amber-400 leading-none">
+              {meal.fat}
+              <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500 ml-0.5">g</span>
+            </p>
+          </div>
+        </div>
+
+        {/* DETAILED FOOD BREAKDOWN */}
+        {meal.foods && meal.foods.length > 0 && (
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 p-6 md:p-8 shadow-sm">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-150 mb-4 tracking-tight">Ingredient Breakdown</h2>
+            <div className="space-y-4">
+              {meal.foods.map((food, i) => (
+                <div key={i} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-zinc-800/80 last:border-b-0">
+                  <div>
+                    <p className="text-sm font-bold text-gray-800 dark:text-zinc-200">{food.name}</p>
+                    <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold">{food.portion} &bull; {food.estimatedWeight}g</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-gray-800 dark:text-zinc-200">{food.calories} kcal</p>
+                    <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-medium">P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g</p>
+                  </div>
                 </div>
               ))}
             </div>
-
-            {/* AI COACH PANEL */}
-            {result.aiTips.length > 0 && (
-              <div className="bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <Sparkles size={16} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-zinc-100">AI Nutrition Coach Insights</h3>
-                    <p className="text-[11px] text-gray-400 dark:text-zinc-500">Personal recommendations based on this meal</p>
-                  </div>
-                </div>
-                <div className="space-y-2.5 pl-1">
-                  {result.aiTips.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-xs text-gray-600 dark:text-zinc-300">
-                      <span className="text-emerald-500 font-bold mt-0.5">✓</span>
-                      <p className="leading-relaxed">{tip}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ACTION BUTTONS */}
-            <div className="flex gap-4 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1 py-3.5 rounded-2xl font-bold border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.98] transition-all"
-                onClick={() => {
-                  setSelectedFile(null);
-                  setPreview(null);
-                  setResult(null);
-                }}
-              >
-                Log another
-              </Button>
-              <Button 
-                className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.98] transition-all" 
-                onClick={() => router.push("/dashboard")}
-              >
-                View dashboard
-              </Button>
-            </div>
           </div>
+        )}
+
+        {/* AI COACH RECOMMENDATIONS */}
+        {meal.aiTips && meal.aiTips.length > 0 && (
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 p-6 md:p-8 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <Sparkles size={16} />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-150 tracking-tight">AI Coach Advice</h2>
+            </div>
+            
+            <AIInsights tips={meal.aiTips} hasData={true} />
+          </div>
+        )}
+
+        <div className="flex gap-4">
+          <Button
+            className="flex-1 py-3.5 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 active:scale-[0.98] transition-all"
+            onClick={() => setResult(null)}
+          >
+            Log Another Meal
+          </Button>
+          <Button
+            className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white active:scale-[0.98] transition-all"
+            onClick={() => router.push("/dashboard")}
+          >
+            Go to Dashboard
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto animate-fade-in-up pb-10 space-y-8">
-      {/* SECTION 1: PREMIUM HERO */}
-      <div className="relative overflow-hidden rounded-3xl border border-emerald-500/10 bg-gradient-to-br from-emerald-950 via-slate-900 to-black p-6 md:p-8 shadow-xl shadow-emerald-500/5">
-        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl" />
-        
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-xl backdrop-blur-md">
-              ✨
-            </div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">
-              AI Food Scanner
-            </h1>
-            <p className="text-sm text-gray-300 max-w-xl leading-relaxed">
-              Upload a meal photo and get instant nutrition analysis. Powered by Google Gemini AI, it calculates calories, counts target macros, and gives insights.
-            </p>
-            
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              {[
-                "AI Food Recognition",
-                "Nutrition Breakdown",
-                "Calorie Tracking",
-                "Personal Coaching Insights"
-              ].map((feature) => (
-                <span key={feature} className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                  ✓ {feature}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+    <div className="max-w-xl mx-auto animate-fade-in-up pb-10 space-y-6">
+      {/* SECTION 1: HEADER */}
+      <div className="space-y-1">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">
+          Log a New Meal
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-zinc-400 font-medium leading-relaxed">
+          Upload a clear photo of your food plate. Gemini AI will automatically detect foods, estimate macros, and offer coaching tips.
+        </p>
       </div>
 
       <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-none p-6 md:p-8 space-y-6">
@@ -328,23 +312,39 @@ export default function UploadPage() {
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          onClick={() => !preview && fileInputRef.current?.click()}
+          onClick={() => !preview && !isCompressing && fileInputRef.current?.click()}
           className={cn(
             "relative border-2 border-dashed rounded-3xl transition-all duration-300 overflow-hidden",
             preview ? "border-transparent shadow-md" : "cursor-pointer border-gray-200 dark:border-zinc-800 hover:border-emerald-400 dark:hover:border-emerald-500/30 hover:bg-emerald-500/[0.01]",
             dragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10" : ""
           )}
         >
-          {preview ? (
+          {isCompressing ? (
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-4">
+              <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 animate-pulse">
+                <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-base font-bold text-gray-900 dark:text-zinc-100 animate-pulse">Compressing Image...</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold animate-pulse">Optimizing for AI Analysis...</p>
+              </div>
+            </div>
+          ) : preview ? (
             <div className="relative h-72 w-full group">
-              <Image src={preview} alt="Preview" fill className="object-cover transition-transform duration-75" />
+              <Image 
+                src={preview} 
+                alt="Preview" 
+                fill 
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover transition-transform duration-75" 
+              />
               
               {/* Floating Image overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30" />
               
               <div className="absolute bottom-4 left-4 text-white space-y-1">
                 <p className="text-xs font-semibold bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-md w-fit">
-                  {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : ""}
+                  {compressedSize ? `${(compressedSize / 1024).toFixed(1)} KB (Optimized)` : ""}
                 </p>
                 <p className="text-sm font-bold capitalize">Selected: {mealType}</p>
               </div>
@@ -355,6 +355,10 @@ export default function UploadPage() {
                   e.stopPropagation();
                   setSelectedFile(null);
                   setPreview(null);
+                  setCompressedFile(null);
+                  setOriginalSize(null);
+                  setCompressedSize(null);
+                  setCompressionPercent(null);
                 }}
                 className="absolute top-4 right-4 w-9 h-9 bg-black/60 hover:bg-black/80 hover:scale-105 text-white rounded-full flex items-center justify-center transition-all shadow-md active:scale-95"
               >
@@ -377,6 +381,36 @@ export default function UploadPage() {
           )}
         </div>
 
+        {/* SECTION 4.5: OPTIMIZATION STATISTICS */}
+        {!isCompressing && preview && originalSize && compressedSize && (
+          <div className="p-4 bg-emerald-500/[0.03] dark:bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 rounded-2xl flex flex-col gap-2.5">
+            <div className="flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-400 font-bold">
+              <span className="flex items-center gap-1.5">⚡ Image Optimized for AI</span>
+              <span className="bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">Saved {compressionPercent}%</span>
+            </div>
+            
+            {/* Visual progress bar representing the compression ratio */}
+            <div className="w-full bg-gray-100 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500" 
+                style={{ width: `${compressionPercent}%` }} 
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-zinc-400">
+              <div>
+                <span className="text-gray-400 dark:text-zinc-500">Original:</span> {originalSize > 1024 * 1024 ? `${(originalSize / 1024 / 1024).toFixed(2)} MB` : `${(originalSize / 1024).toFixed(1)} KB`}
+              </div>
+              <div>
+                <span className="text-gray-400 dark:text-zinc-500">Compressed:</span> {(compressedSize / 1024).toFixed(1)} KB
+              </div>
+              <div>
+                <span className="text-gray-400 dark:text-zinc-500">Saved:</span> {compressionPercent}%
+              </div>
+            </div>
+          </div>
+        )}
+
         <input
           ref={fileInputRef}
           type="file"
@@ -388,7 +422,7 @@ export default function UploadPage() {
           }}
         />
 
-        {!preview && (
+        {!preview && !isCompressing && (
           <Button
             variant="outline"
             className="w-full py-3.5 rounded-2xl font-bold border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.99] transition-all"
@@ -423,7 +457,7 @@ export default function UploadPage() {
           <Button
             className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-base font-bold py-4 rounded-2xl shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-[0.98] transition-all"
             size="lg"
-            disabled={!selectedFile}
+            disabled={!selectedFile || isCompressing}
             onClick={handleAnalyze}
           >
             <Sparkles size={16} />
@@ -433,7 +467,7 @@ export default function UploadPage() {
       </div>
 
       {/* EMPTY ONBOARDING TIPS SECTION */}
-      {!preview && !loading && (
+      {!preview && !loading && !isCompressing && (
         <div className="bg-emerald-500/[0.01] dark:bg-emerald-500/[0.005] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">💡</span>
