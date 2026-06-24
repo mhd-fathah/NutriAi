@@ -116,8 +116,7 @@ export class UploadMealUseCase {
       ],
     });
 
-    // 6. Save meal to database
-    const meal = await this.mealRepository.create({
+    const mealData = {
       userId,
       mealType,
       imageUrl,
@@ -137,8 +136,14 @@ export class UploadMealUseCase {
       isEstimated: nutrition.isEstimated,
       aiStatus: nutrition.aiStatus,
       aiProvider: nutrition.aiProvider,
-    });
+    };
+    console.log("MEAL_TO_SAVE", mealData);
 
+    // 6. Save meal to database
+    const meal = await this.mealRepository.create(mealData);
+    console.log("SAVED_MEAL", meal);
+
+    console.log("ACTION_RETURN", meal);
     return meal;
   }
 }

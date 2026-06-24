@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Meal, MealDocument } from '../schemas/meal.schema';
 import { User, UserDocument } from '../schemas/user.schema';
 import { IDashboardRepository } from '../../../../domain/repositories/dashboard.repository.interface';
+import { InMemoryCacheService } from './cache.service';
 
 @Injectable()
 export class MongoDashboardRepository implements IDashboardRepository {
@@ -12,9 +13,17 @@ export class MongoDashboardRepository implements IDashboardRepository {
   constructor(
     @InjectModel(Meal.name) private readonly mealModel: Model<MealDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly cacheService: InMemoryCacheService,
   ) {}
 
   async getDashboardOverview(userId: string) {
+    const cacheKey = `dashboard_${userId}`;
+    const cached = this.cacheService.get<any>(cacheKey);
+    if (cached) {
+      this.logger.log(`[DB] Cache Hit for Dashboard Overview. User: ${userId}`);
+      return cached;
+    }
+
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -27,7 +36,7 @@ export class MongoDashboardRepository implements IDashboardRepository {
 
     const dbStartTime = Date.now();
 
-    // Perform queries in parallel to optimize database round trips
+    // Perform queries in parallel with lean execution to optimize database round trips
     const [userDoc, todayMealsDocs, todayNutritionResults, weeklyStats, mealDatesDocs] = await Promise.all([
       this.userModel.findById(userId).lean().exec(),
       this.mealModel
@@ -83,7 +92,8 @@ export class MongoDashboardRepository implements IDashboardRepository {
     ]);
 
     const dbEndTime = Date.now();
-    this.logger.log(`[Database Execution Time] ${dbEndTime - dbStartTime}ms`);
+    const duration = dbEndTime - dbStartTime;
+    this.logger.log(`[DB] Query: Dashboard Overview | Duration: ${duration}ms`);
 
     if (!userDoc) {
       throw new NotFoundException('User not found');
@@ -204,7 +214,7 @@ export class MongoDashboardRepository implements IDashboardRepository {
       onboardingCompleted: userDoc.onboardingCompleted,
     };
 
-    return {
+    const response = {
       user: userProfile,
       todayNutrition,
       todayMeals,
@@ -215,5 +225,10 @@ export class MongoDashboardRepository implements IDashboardRepository {
       summary,
       streak,
     };
+
+    // Cache results for 5 minutes (300000 ms)
+    this.cacheService.set(cacheKey, response, 300000);
+
+    return response;
   }
 }

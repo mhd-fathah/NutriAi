@@ -104,5 +104,8 @@ export class Meal {
 
 export const MealSchema = SchemaFactory.createForClass(Meal);
 
-// Create compound index for querying meal history efficiently
+// Create compound and single-field indexes for querying meal history, types, and analytics efficiently
 MealSchema.index({ userId: 1, createdAt: -1 });
+MealSchema.index({ userId: 1, mealType: 1 });
+MealSchema.index({ userId: 1, createdAt: 1 });
+MealSchema.index({ createdAt: -1 });

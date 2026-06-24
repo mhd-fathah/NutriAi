@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users/users.module';
 import { MealsModule } from './modules/meals/meals.module';
 import { GeminiModule } from './modules/gemini/gemini.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { CacheModule } from './infrastructure/database/mongodb/repositories/cache.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
         uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/nutriai',
       }),
     }),
+    CacheModule,
     AuthModule,
     UsersModule,
     MealsModule,

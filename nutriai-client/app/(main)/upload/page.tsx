@@ -221,7 +221,7 @@ export default function UploadPage() {
         {/* DETAILED FOOD BREAKDOWN */}
         {meal.foods && meal.foods.length > 0 && (
           <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 p-6 md:p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-150 mb-4 tracking-tight">Ingredient Breakdown</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-4 tracking-tight">Ingredient Breakdown</h2>
             <div className="space-y-4">
               {meal.foods.map((food, i) => (
                 <div key={i} className="flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-zinc-800/80 last:border-b-0">
@@ -246,7 +246,7 @@ export default function UploadPage() {
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <Sparkles size={16} />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-150 tracking-tight">AI Coach Advice</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 tracking-tight">AI Coach Advice</h2>
             </div>
             
             <AIInsights tips={meal.aiTips} hasData={true} />
@@ -258,7 +258,7 @@ export default function UploadPage() {
             className="flex-1 py-3.5 rounded-2xl font-bold bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 active:scale-[0.98] transition-all"
             onClick={() => setResult(null)}
           >
-            Log Another Meal
+            Scan Another Meal
           </Button>
           <Button
             className="flex-1 py-3.5 rounded-2xl font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white active:scale-[0.98] transition-all"
@@ -276,7 +276,7 @@ export default function UploadPage() {
       {/* SECTION 1: HEADER */}
       <div className="space-y-1">
         <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-zinc-50 tracking-tight">
-          Log a New Meal
+          Scan a New Meal
         </h1>
         <p className="text-sm text-gray-500 dark:text-zinc-400 font-medium leading-relaxed">
           Upload a clear photo of your food plate. Gemini AI will automatically detect foods, estimate macros, and offer coaching tips.

@@ -11,7 +11,7 @@ import ThemeToggle from "./ThemeToggle";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/upload", label: "Log Meal", icon: Upload },
+  { href: "/upload", label: "Scan Meal", icon: Upload },
   { href: "/history", label: "History", icon: History },
 ];
 

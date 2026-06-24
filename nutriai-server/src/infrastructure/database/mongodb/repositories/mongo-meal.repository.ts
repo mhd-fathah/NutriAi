@@ -4,14 +4,16 @@ import { Model } from 'mongoose';
 import { Meal, MealDocument } from '../schemas/meal.schema';
 import { IMealRepository } from '../../../../domain/repositories/meal.repository.interface';
 import { MealEntity } from '../../../../domain/entities/meal.entity';
+import { InMemoryCacheService } from './cache.service';
 
 @Injectable()
 export class MongoMealRepository implements IMealRepository {
   constructor(
     @InjectModel(Meal.name) private readonly mealModel: Model<MealDocument>,
+    private readonly cacheService: InMemoryCacheService,
   ) {}
 
-  private mapToEntity(doc: MealDocument | null): MealEntity | null {
+  private mapToEntity(doc: any | null): MealEntity | null {
     if (!doc) return null;
     return new MealEntity({
       id: doc._id.toString(),
@@ -50,13 +52,16 @@ export class MongoMealRepository implements IMealRepository {
   }
 
   async findById(id: string): Promise<MealEntity | null> {
-    const meal = await this.mealModel.findById(id).exec();
+    const meal = await this.mealModel.findById(id).lean().exec();
     return this.mapToEntity(meal);
   }
 
   async create(meal: Partial<MealEntity>): Promise<MealEntity> {
     const newMeal = new this.mealModel(meal);
     const saved = await newMeal.save();
+    if (saved && saved.userId) {
+      this.cacheService.delete(`dashboard_${saved.userId.toString()}`);
+    }
     return this.mapToEntity(saved)!;
   }
 
@@ -71,6 +76,7 @@ export class MongoMealRepository implements IMealRepository {
         createdAt: { $gte: startDate, $lt: endDate },
       })
       .sort({ createdAt: -1 })
+      .lean()
       .exec();
     return meals.map((m) => this.mapToEntity(m)!);
   }
@@ -86,8 +92,9 @@ export class MongoMealRepository implements IMealRepository {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
+        .lean()
         .exec(),
-      this.mealModel.countDocuments({ userId }).exec(),
+      this.mealModel.countDocuments({ userId }).lean().exec(),
     ]);
 
     return {
@@ -97,7 +104,10 @@ export class MongoMealRepository implements IMealRepository {
   }
 
   async deleteById(id: string): Promise<MealEntity | null> {
-    const deleted = await this.mealModel.findByIdAndDelete(id).exec();
+    const deleted = await this.mealModel.findByIdAndDelete(id).lean().exec();
+    if (deleted && deleted.userId) {
+      this.cacheService.delete(`dashboard_${deleted.userId.toString()}`);
+    }
     return this.mapToEntity(deleted);
   }
 }

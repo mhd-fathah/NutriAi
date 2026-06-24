@@ -18,7 +18,7 @@ interface AIInsightsProps {
 }
 
 const defaultTips = [
-  "Log your first meal to get personalized AI nutrition insights.",
+  "Scan your first meal to get personalized AI nutrition insights.",
   "Upload a photo of your food for instant calorie and macro analysis.",
   "Track consistently to unlock your weekly nutrition trends.",
 ];

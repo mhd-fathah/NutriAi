@@ -171,11 +171,11 @@ export const TodayMealsList = memo(function TodayMealsList({ meals }: { meals: M
     return (
       <EmptyState
         icon="🍽️"
-        title="No meals logged today"
+        title="No meals scanned today"
         description="Upload a meal photo to get started with AI nutrition analysis"
         action={
           <Link href="/upload">
-            <Button size="sm">Log your first meal</Button>
+            <Button size="sm">Scan your first meal</Button>
           </Link>
         }
       />

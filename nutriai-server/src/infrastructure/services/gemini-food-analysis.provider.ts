@@ -112,6 +112,58 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
   }
 
   private validateAndSanitize(parsedObj: any): MultiStageNutrition {
+    if (!parsedObj) {
+      throw new Error('Parsed Gemini response is null or undefined');
+    }
+
+    // Resilient flat-to-structured schema conversion
+    if (!parsedObj.foods && (parsedObj.foodName || parsedObj.calories !== undefined)) {
+      this.logger.warn('[Parser] Detected flat JSON structure from Gemini. Normalizing to structured format.');
+      
+      const estimatedWeightStr = parsedObj.estimatedWeight ? String(parsedObj.estimatedWeight) : '0';
+      const estimatedWeightNum = parseInt(estimatedWeightStr.replace(/[^\d]/g, ''), 10) || 0;
+
+      const singleFood = {
+        name: parsedObj.foodName || 'Unknown Food',
+        portion: 'Regular',
+        estimatedWeight: estimatedWeightNum,
+        calories: Number(parsedObj.calories) || 0,
+        protein: Number(parsedObj.protein) || 0,
+        carbs: Number(parsedObj.carbs) || 0,
+        fat: Number(parsedObj.fat) || 0,
+        sugar: Number(parsedObj.sugar) || 0,
+        fiber: Number(parsedObj.fiber) || 0,
+        sodium: Number(parsedObj.sodium) || 0,
+      };
+
+      parsedObj = {
+        foods: [singleFood],
+        totals: {
+          calories: singleFood.calories,
+          protein: singleFood.protein,
+          carbs: singleFood.carbs,
+          fat: singleFood.fat,
+          sugar: singleFood.sugar,
+          fiber: singleFood.fiber,
+          sodium: singleFood.sodium,
+        },
+        confidence: Number(parsedObj.confidence) || 90,
+      };
+    }
+
+    // Ensure totals is defined for schema validation fallback
+    if (!parsedObj.totals) {
+      parsedObj.totals = {
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        sugar: 0,
+        fiber: 0,
+        sodium: 0,
+      };
+    }
+
     const validated = MultiStageNutritionSchema.parse(parsedObj);
 
     // Validate realistic limits for each food item
@@ -174,7 +226,9 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
 
   private cleanAndParseJSON(text: string): MultiStageNutrition {
     const parsedObj = extractJSON(text);
-    return this.validateAndSanitize(parsedObj);
+    const sanitized = this.validateAndSanitize(parsedObj);
+    console.log('GEMINI_RESULT', sanitized);
+    return sanitized;
   }
 
   private async callGeminiModel(

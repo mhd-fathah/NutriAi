@@ -101,7 +101,7 @@ export default async function DashboardPage() {
               className="inline-flex items-center justify-center gap-2 w-full md:w-auto bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-sm font-semibold px-6 py-3.5 rounded-xl shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
             >
               <Upload size={16} />
-              Log Meal
+              Scan Meal
             </Link>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default async function DashboardPage() {
           />
           
           <div className="mt-6 text-center space-y-1">
-            <p className="text-sm font-bold text-gray-900 dark:text-zinc-150 tracking-tight">Daily Calories</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Daily Calories</p>
             <p className="text-xs text-gray-500">
               {Math.round((user.dailyCalories || 2000) - todayNutrition.calories) > 0 ? (
                 <span className="font-semibold text-emerald-600 dark:text-emerald-450">

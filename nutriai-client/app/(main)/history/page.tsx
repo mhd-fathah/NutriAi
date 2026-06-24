@@ -352,7 +352,7 @@ export default function HistoryPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Timeline Log</h2>
-                <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold">List of logged meals in this cycle</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold">List of scanned meals in this cycle</p>
               </div>
             </div>
             
@@ -360,11 +360,11 @@ export default function HistoryPage() {
               <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-none p-8">
                 <EmptyState
                   icon="📋"
-                  title="No meals logged yet"
-                  description={`You haven't logged any meals ${period === "daily" ? "today" : period === "weekly" ? "this week" : "this month"} yet. Let's record your next meal!`}
+                  title="No meals scanned yet"
+                  description={`You haven't scanned any meals ${period === "daily" ? "today" : period === "weekly" ? "this week" : "this month"} yet. Let's record your next meal!`}
                   action={
                     <Link href="/upload">
-                      <Button size="sm">Log first meal</Button>
+                      <Button size="sm">Scan first meal</Button>
                     </Link>
                   }
                 />

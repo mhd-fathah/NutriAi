@@ -104,7 +104,7 @@ export default function InstallPWA() {
                 <Share2 size={18} />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-sm font-bold text-gray-900 dark:text-zinc-150">Install NutriAI</h4>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-zinc-100">Install NutriAI</h4>
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Add to home screen from Safari browser.</p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function InstallPWA() {
                 <Download size={18} />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-sm font-bold text-gray-900 dark:text-zinc-150">Install NutriAI</h4>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-zinc-100">Install NutriAI</h4>
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Track meals faster from your home screen.</p>
               </div>
             </div>

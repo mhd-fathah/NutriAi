@@ -11,7 +11,7 @@ export class MongoUserRepository implements IUserRepository {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  private mapToEntity(doc: UserDocument | null): UserEntity | null {
+  private mapToEntity(doc: any | null): UserEntity | null {
     if (!doc) return null;
     return new UserEntity({
       id: doc._id.toString(),
@@ -40,12 +40,12 @@ export class MongoUserRepository implements IUserRepository {
   }
 
   async findById(id: string): Promise<UserEntity | null> {
-    const user = await this.userModel.findById(id).exec();
+    const user = await this.userModel.findById(id).lean().exec();
     return this.mapToEntity(user);
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne({ email }).exec();
+    const user = await this.userModel.findOne({ email }).lean().exec();
     return this.mapToEntity(user);
   }
 
