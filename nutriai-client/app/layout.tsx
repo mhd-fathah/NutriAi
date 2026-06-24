@@ -3,6 +3,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import InstallPWA from "@/components/shared/InstallPWA";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: {
@@ -47,20 +48,22 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          {children}
-          <InstallPWA />
-          <Toaster
-            position="top-right"
-            richColors
-            closeButton
-            theme="system"
-            toastOptions={{
-              style: {
-                fontFamily: "Inter, sans-serif",
-                borderRadius: "12px",
-              },
-            }}
-          />
+          <SessionProvider>
+            {children}
+            <InstallPWA />
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              theme="system"
+              toastOptions={{
+                style: {
+                  fontFamily: "Inter, sans-serif",
+                  borderRadius: "12px",
+                },
+              }}
+            />
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
