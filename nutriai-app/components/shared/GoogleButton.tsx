@@ -31,8 +31,8 @@ export default function GoogleButton({ mode, className }: GoogleButtonProps) {
       disabled={isLoading}
       onClick={handleGoogleLogin}
       className={cn(
-        "flex items-center justify-center gap-3 w-full px-4 py-3.5 rounded-xl border border-gray-200/80 bg-white text-sm font-bold text-gray-700 shadow-sm",
-        "hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 active:scale-[0.98] cursor-pointer",
+        "flex items-center justify-center gap-3 w-full px-4 py-3.5 rounded-xl border border-gray-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-bold text-gray-700 dark:text-zinc-300 shadow-sm dark:shadow-none",
+        "hover:bg-gray-50 dark:hover:bg-zinc-800 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-none transition-all duration-300 active:scale-[0.98] cursor-pointer",
         "disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-sm",
         className
       )}

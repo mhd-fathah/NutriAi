@@ -20,9 +20,9 @@ const activityOptions = Object.entries(ACTIVITY_LEVELS).map(([value, { label, de
 }));
 
 const goalLabels: Record<string, { label: string; color: string; icon: string }> = {
-  lose_weight: { label: "Lose Weight", color: "text-red-600 bg-red-50", icon: "📉" },
-  maintain_weight: { label: "Maintain Weight", color: "text-emerald-600 bg-emerald-50", icon: "⚖️" },
-  gain_weight: { label: "Gain Weight", color: "text-blue-600 bg-blue-50", icon: "📈" },
+  lose_weight: { label: "Lose Weight", color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20", icon: "📉" },
+  maintain_weight: { label: "Maintain Weight", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20", icon: "⚖️" },
+  gain_weight: { label: "Gain Weight", color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20", icon: "📈" },
 };
 
 export default function OnboardingPage() {
@@ -100,22 +100,22 @@ export default function OnboardingPage() {
       </div>
 
       {/* SECTION 2: ONBOARDING PROGRESS */}
-      <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xl shadow-gray-100/40">
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 p-6 shadow-xl shadow-gray-100/40 dark:shadow-black/10">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Profile Setup</span>
-          <span className="text-xs font-bold text-gray-500">Step 1 of 1 (100%)</span>
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Profile Setup</span>
+          <span className="text-xs font-bold text-gray-500 dark:text-zinc-400">Step 1 of 1 (100%)</span>
         </div>
-        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
           <div className="h-full bg-emerald-500 rounded-full w-full transition-all duration-500" />
         </div>
       </div>
 
       {/* SECTION 3: FORM CARD */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8">
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-black/10 p-6 md:p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-1">
-              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 mb-1">
+              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-zinc-200 mb-1">
                 <span>🎂</span>
                 <span>Age</span>
               </div>
@@ -130,11 +130,11 @@ export default function OnboardingPage() {
                   setTimeout(handlePreview, 100);
                 }}
               />
-              <p className="text-[11px] text-gray-400">Used to calculate your daily metabolic rate.</p>
+              <p className="text-[11px] text-gray-400 dark:text-zinc-500">Used to calculate your daily metabolic rate.</p>
             </div>
 
             <div className="space-y-1">
-              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 mb-1">
+              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-zinc-200 mb-1">
                 <span>👤</span>
                 <span>Gender</span>
               </div>
@@ -152,11 +152,11 @@ export default function OnboardingPage() {
                   setTimeout(handlePreview, 100);
                 }}
               />
-              <p className="text-[11px] text-gray-400">Required for accurate BMR calculations.</p>
+              <p className="text-[11px] text-gray-400 dark:text-zinc-500">Required for accurate BMR calculations.</p>
             </div>
 
             <div className="space-y-1">
-              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 mb-1">
+              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-zinc-200 mb-1">
                 <span>📏</span>
                 <span>Height (cm)</span>
               </div>
@@ -171,11 +171,11 @@ export default function OnboardingPage() {
                   setTimeout(handlePreview, 100);
                 }}
               />
-              <p className="text-[11px] text-gray-400">Enter your height in centimeters.</p>
+              <p className="text-[11px] text-gray-400 dark:text-zinc-500">Enter your height in centimeters.</p>
             </div>
 
             <div className="space-y-1">
-              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 mb-1">
+              <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-zinc-200 mb-1">
                 <span>⚖️</span>
                 <span>Weight (kg)</span>
               </div>
@@ -190,12 +190,12 @@ export default function OnboardingPage() {
                   setTimeout(handlePreview, 100);
                 }}
               />
-              <p className="text-[11px] text-gray-400">Enter your current body weight.</p>
+              <p className="text-[11px] text-gray-400 dark:text-zinc-500">Enter your current body weight.</p>
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 mb-1">
+            <div className="flex items-center gap-1 text-sm font-semibold text-gray-900 dark:text-zinc-200 mb-1">
               <span>🏃</span>
               <span>Activity Level</span>
             </div>
@@ -210,15 +210,15 @@ export default function OnboardingPage() {
                 setTimeout(handlePreview, 100);
               }}
             />
-            <p className="text-[11px] text-gray-400">Helps determine active energy expenditure.</p>
+            <p className="text-[11px] text-gray-400 dark:text-zinc-500">Helps determine active energy expenditure.</p>
           </div>
 
           {/* SECTION 4 & 5: LIVE HEALTH ANALYSIS + NUTRITION GOALS */}
           {preview && goalInfo && (
-            <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/50 rounded-3xl border border-emerald-100 p-6 space-y-6 animate-fade-in">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-emerald-100/50">
+            <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/10 dark:to-teal-950/10 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 p-6 space-y-6 animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-emerald-100/50 dark:border-zinc-800">
                 <div className="space-y-1.5">
-                  <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">AI Health Analysis</p>
+                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">AI Health Analysis</p>
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{goalInfo.icon}</span>
                     <span className={cn("text-base font-bold px-3 py-0.5 rounded-full", goalInfo.color)}>
@@ -226,12 +226,12 @@ export default function OnboardingPage() {
                     </span>
                   </div>
                 </div>
-                <div className="bg-white border border-emerald-100/60 px-4 py-2.5 rounded-2xl flex items-center justify-between gap-6 self-start sm:self-auto shadow-sm">
+                <div className="bg-white dark:bg-zinc-900 border border-emerald-100/60 dark:border-zinc-800 px-4 py-2.5 rounded-2xl flex items-center justify-between gap-6 self-start sm:self-auto shadow-sm">
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">BMI Index</p>
-                    <p className="text-xl font-extrabold text-gray-900">{preview.bmi}</p>
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">BMI Index</p>
+                    <p className="text-xl font-extrabold text-gray-900 dark:text-zinc-100">{preview.bmi}</p>
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     {Number(preview.bmi) < 18.5 ? "Underweight" : Number(preview.bmi) < 25 ? "Healthy Range" : Number(preview.bmi) < 30 ? "Overweight" : "Obese"}
                   </span>
                 </div>
@@ -239,18 +239,18 @@ export default function OnboardingPage() {
 
               {/* SECTION 5: NUTRITION GOALS */}
               <div className="space-y-3">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Calculated Nutrition Goals</p>
+                <p className="text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Calculated Nutrition Goals</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
-                    { label: "Calories", value: `${preview.dailyCalories}`, unit: "kcal", color: "rose", bg: "bg-rose-50/50" },
-                    { label: "Protein", value: `${preview.dailyProtein}`, unit: "g", color: "emerald", bg: "bg-emerald-50/50" },
-                    { label: "Carbs", value: `${preview.dailyCarbs}`, unit: "g", color: "blue", bg: "bg-blue-50/50" },
-                    { label: "Fat", value: `${preview.dailyFat}`, unit: "g", color: "amber", bg: "bg-amber-50/50" },
+                    { label: "Calories", value: `${preview.dailyCalories}`, unit: "kcal", color: "rose", bg: "bg-rose-50/50 dark:bg-rose-950/10" },
+                    { label: "Protein", value: `${preview.dailyProtein}`, unit: "g", color: "emerald", bg: "bg-emerald-50/50 dark:bg-emerald-950/10" },
+                    { label: "Carbs", value: `${preview.dailyCarbs}`, unit: "g", color: "blue", bg: "bg-blue-50/50 dark:bg-blue-950/10" },
+                    { label: "Fat", value: `${preview.dailyFat}`, unit: "g", color: "amber", bg: "bg-amber-50/50 dark:bg-amber-950/10" },
                   ].map(({ label, value, unit, bg }) => (
-                    <div key={label} className={cn("rounded-2xl p-4 text-center border border-gray-100 shadow-sm bg-white hover:-translate-y-0.5 transition-all duration-200")}>
-                      <p className="text-xs text-gray-400 font-semibold mb-0.5 uppercase tracking-wider">{label}</p>
-                      <p className="text-2xl font-black text-gray-900">{value}</p>
-                      <p className="text-[10px] font-semibold text-gray-400">{unit}/day</p>
+                    <div key={label} className={cn("rounded-2xl p-4 text-center border border-gray-100 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900 hover:-translate-y-0.5 transition-all duration-200", bg)}>
+                      <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold mb-0.5 uppercase tracking-wider">{label}</p>
+                      <p className="text-2xl font-black text-gray-900 dark:text-zinc-100">{value}</p>
+                      <p className="text-[10px] font-semibold text-gray-400 dark:text-zinc-500">{unit}/day</p>
                     </div>
                   ))}
                 </div>
@@ -259,13 +259,13 @@ export default function OnboardingPage() {
           )}
 
           {/* SECTION 6: AI RECOMMENDATION INFO SECTION */}
-          <div className="bg-emerald-500/[0.02] border border-dashed border-emerald-500/20 rounded-3xl p-5 flex gap-3.5 items-start">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+          <div className="bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 dark:border-emerald-500/10 rounded-3xl p-5 flex gap-3.5 items-start">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
               ✨
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-gray-900">Personalized AI Recommendation</h4>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <h4 className="text-sm font-bold text-gray-900 dark:text-zinc-200">Personalized AI Recommendation</h4>
+              <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
                 Based on your metabolic profile, we will automatically customize your daily calories and target macros to align with your health objectives.
               </p>
             </div>

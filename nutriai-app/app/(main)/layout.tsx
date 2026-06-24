@@ -11,7 +11,7 @@ export default async function MainLayout({
   if (!session?.user) redirect("/login");
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       <Sidebar userName={session.user.name || "User"} userImage={session.user.image || undefined} />
       <main className="lg:ml-60 min-h-screen pb-20 lg:pb-0">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

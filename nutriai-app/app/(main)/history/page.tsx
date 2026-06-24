@@ -24,27 +24,27 @@ const tabs: { value: Period; label: string }[] = [
 
 function SummaryCard({ label, value, unit, icon, color }: { label: string; value: number; unit: string; icon: string; color: "emerald" | "blue" | "amber" | "rose" | "purple" }) {
   const colorMap = {
-    emerald: { bg: "bg-emerald-50 text-emerald-600", border: "border-emerald-100/50" },
-    blue: { bg: "bg-blue-50 text-blue-600", border: "border-blue-100/50" },
-    amber: { bg: "bg-amber-50 text-amber-600", border: "border-amber-100/50" },
-    rose: { bg: "bg-rose-50 text-rose-600", border: "border-rose-100/50" },
-    purple: { bg: "bg-purple-50 text-purple-600", border: "border-purple-100/50" }
+    emerald: { bg: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400", border: "border-emerald-100/50 dark:border-emerald-900/30" },
+    blue: { bg: "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400", border: "border-blue-100/50 dark:border-blue-900/30" },
+    amber: { bg: "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400", border: "border-amber-100/50 dark:border-amber-900/30" },
+    rose: { bg: "bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400", border: "border-rose-100/50 dark:border-rose-900/30" },
+    purple: { bg: "bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400", border: "border-purple-100/50 dark:border-purple-900/30" }
   };
   const theme = colorMap[color] || colorMap.emerald;
 
   return (
-    <div className={cn("bg-white rounded-3xl border border-gray-100 p-5 shadow-xl shadow-gray-100/40 hover:-translate-y-1 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300 relative overflow-hidden group", theme.border)}>
-      <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50 rounded-full -mr-12 -mt-12 blur-2xl opacity-50 group-hover:scale-125 transition-transform duration-500" />
+    <div className={cn("bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 p-5 shadow-xl shadow-gray-100/40 dark:shadow-none hover:-translate-y-1 hover:shadow-2xl hover:shadow-gray-200/50 dark:hover:shadow-black/20 transition-all duration-300 relative overflow-hidden group", theme.border)}>
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50 dark:bg-zinc-800/20 rounded-full -mr-12 -mt-12 blur-2xl opacity-50 group-hover:scale-125 transition-transform duration-500" />
       <div className="flex items-center justify-between mb-3 relative z-10">
         <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-lg font-semibold", theme.bg)}>
           {icon}
         </div>
       </div>
       <div className="space-y-1 relative z-10">
-        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{label}</p>
-        <p className="text-3xl font-extrabold text-gray-900 leading-none">
+        <p className="text-xs text-gray-500 dark:text-zinc-400 font-semibold uppercase tracking-wider">{label}</p>
+        <p className="text-3xl font-extrabold text-gray-900 dark:text-zinc-50 leading-none">
           {Math.round(value)}
-          <span className="text-sm font-semibold text-gray-400 ml-0.5">{unit}</span>
+          <span className="text-sm font-semibold text-gray-400 dark:text-zinc-500 ml-0.5">{unit}</span>
         </p>
       </div>
     </div>
@@ -54,9 +54,9 @@ function SummaryCard({ label, value, unit, icon, color }: { label: string; value
 function MealHistoryCard({ meal }: { meal: MealRecord }) {
   const mealInfo = MEAL_TYPES[meal.mealType];
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white rounded-3xl border border-gray-100 hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300 group">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 hover:shadow-xl dark:hover:shadow-none transition-all duration-300 group">
       <div className="flex items-center gap-4 min-w-0">
-        <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-100 shadow-inner">
+        <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 shadow-inner">
           <Image 
             src={meal.imageUrl ? meal.imageUrl : "/images/food-placeholder.jpg"} 
             alt={meal.foodName} 
@@ -66,23 +66,23 @@ function MealHistoryCard({ meal }: { meal: MealRecord }) {
           />
         </div>
         <div className="flex-1 min-w-0 space-y-1.5">
-          <p className="font-bold text-gray-900 text-lg tracking-tight truncate">{meal.foodName}</p>
+          <p className="font-bold text-gray-900 dark:text-zinc-100 text-lg tracking-tight truncate">{meal.foodName}</p>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-semibold">
+            <span className="inline-flex items-center gap-1 text-xs bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-semibold">
               {mealInfo?.icon} {mealInfo?.label}
             </span>
-            <span className="text-xs font-medium text-gray-400">{formatDate(meal.createdAt)}</span>
-            <span className="text-xs font-medium text-gray-400">&bull; {formatTime(meal.createdAt)}</span>
+            <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">{formatDate(meal.createdAt)}</span>
+            <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">&bull; {formatTime(meal.createdAt)}</span>
           </div>
         </div>
       </div>
       
-      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-50 flex-shrink-0">
-        <span className="text-xl font-extrabold text-emerald-600 tracking-tight">{meal.calories} kcal</span>
+      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-50 dark:border-zinc-800/80 flex-shrink-0">
+        <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">{meal.calories} kcal</span>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">P: {meal.protein}g</span>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700">C: {meal.carbs}g</span>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">F: {meal.fat}g</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">P: {meal.protein}g</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400">C: {meal.carbs}g</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400">F: {meal.fat}g</span>
         </div>
       </div>
     </div>
@@ -195,14 +195,14 @@ export default function HistoryPage() {
 
           {/* SECTION 4: TREND ANALYTICS */}
           {period !== "daily" && chartData.length > 0 && (
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+            <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-none p-6 md:p-8 transition-all duration-300">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                   <TrendingUp size={16} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 tracking-tight">Calorie Trends</h2>
-                  <p className="text-xs text-gray-400">View calorie intake patterns and comparisons</p>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Calorie Trends</h2>
+                  <p className="text-xs text-gray-400 dark:text-zinc-500 font-medium">View calorie intake patterns and comparisons</p>
                 </div>
               </div>
               <CaloriesLineChart data={chartData} dailyCalories={0} />
@@ -213,13 +213,13 @@ export default function HistoryPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">Timeline Log</h2>
-                <p className="text-xs text-gray-400 font-medium">List of logged meals in this cycle</p>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Timeline Log</h2>
+                <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold">List of logged meals in this cycle</p>
               </div>
             </div>
             
             {data.meals.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-8">
+              <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-none p-8">
                 <EmptyState
                   icon="📋"
                   title="No meals logged yet"

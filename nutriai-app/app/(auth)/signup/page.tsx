@@ -114,28 +114,28 @@ export default function SignupPage() {
       </div>
 
       {/* RIGHT PANEL: REGISTRATION FORM */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 md:px-12 bg-gray-50/50 min-h-screen">
+      <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 md:px-12 bg-gray-50/50 dark:bg-zinc-950 min-h-screen">
         <div className="w-full max-w-md space-y-8 animate-fade-in-up">
           {/* Mobile brand header */}
           <div className="flex lg:hidden flex-col items-center text-center space-y-3 mb-4">
             <Logo size={48} />
             <div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight">NutriAI</h2>
-              <p className="text-xs font-bold text-emerald-600 tracking-wider uppercase">AI Nutrition Tracker</p>
+              <h2 className="text-2xl font-black text-gray-900 dark:text-zinc-100 tracking-tight">NutriAI</h2>
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tracking-wider uppercase">AI Nutrition Tracker</p>
             </div>
           </div>
 
           {/* Form container */}
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 space-y-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-black/25 p-6 md:p-8 space-y-6">
             <div className="space-y-3">
               {/* Progress Indicator */}
               <div className="flex items-center justify-between text-[10px] font-bold tracking-wider uppercase">
-                <span className="text-emerald-600">Step 1 of 2</span>
-                <span className="text-gray-400">Create Account &rarr; Profile Setup</span>
+                <span className="text-emerald-600 dark:text-emerald-400">Step 1 of 2</span>
+                <span className="text-gray-400 dark:text-zinc-500">Create Account &rarr; Profile Setup</span>
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Create Your Account </h3>
-                <p className="text-xs text-gray-400">Start tracking your nutrition with AI today</p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Create Your Account </h3>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">Start tracking your nutrition with AI today</p>
               </div>
             </div>
 
@@ -147,11 +147,11 @@ export default function SignupPage() {
                   label="Full Name"
                   placeholder="John Doe"
                   autoComplete="name"
-                  icon={<User className="w-4 h-4 text-gray-400" />}
+                  icon={<User className="w-4 h-4 text-gray-400 dark:text-zinc-500" />}
                   error={errors.name?.message}
                   {...register("name")}
                 />
-                <p className="text-[10px] text-gray-400">Used for your personalized nutrition profile.</p>
+                <p className="text-[10px] text-gray-400 dark:text-zinc-500">Used for your personalized nutrition profile.</p>
               </div>
 
               <div className="space-y-1">
@@ -161,11 +161,11 @@ export default function SignupPage() {
                   label="Email Address"
                   placeholder="you@example.com"
                   autoComplete="email"
-                  icon={<Mail className="w-4 h-4 text-gray-400" />}
+                  icon={<Mail className="w-4 h-4 text-gray-400 dark:text-zinc-500" />}
                   error={errors.email?.message}
                   {...register("email")}
                 />
-                <p className="text-[10px] text-gray-400">Used for account access and progress tracking.</p>
+                <p className="text-[10px] text-gray-400 dark:text-zinc-500">Used for account access and progress tracking.</p>
               </div>
 
               <div className="space-y-1">
@@ -175,11 +175,11 @@ export default function SignupPage() {
                   label="Password"
                   placeholder="Min. 6 characters"
                   autoComplete="new-password"
-                  icon={<Lock className="w-4 h-4 text-gray-400" />}
+                  icon={<Lock className="w-4 h-4 text-gray-400 dark:text-zinc-500" />}
                   error={errors.password?.message}
                   {...register("password")}
                 />
-                <p className="text-[10px] text-gray-400">Minimum of 6 characters required.</p>
+                <p className="text-[10px] text-gray-400 dark:text-zinc-500">Minimum of 6 characters required.</p>
               </div>
 
               <div className="space-y-1">
@@ -189,11 +189,11 @@ export default function SignupPage() {
                   label="Confirm Password"
                   placeholder="Repeat your password"
                   autoComplete="new-password"
-                  icon={<Lock className="w-4 h-4 text-gray-400" />}
+                  icon={<Lock className="w-4 h-4 text-gray-400 dark:text-zinc-500" />}
                   error={errors.confirmPassword?.message}
                   {...register("confirmPassword")}
                 />
-                <p className="text-[10px] text-gray-400">Must match your password.</p>
+                <p className="text-[10px] text-gray-400 dark:text-zinc-500">Must match your password.</p>
               </div>
 
               {/* Submit CTA */}
@@ -209,20 +209,20 @@ export default function SignupPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-4">
-              <div className="h-px bg-gray-150 flex-1" />
-              <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">or continue with</span>
-              <div className="h-px bg-gray-150 flex-1" />
+              <div className="h-px bg-gray-150 dark:bg-zinc-800 flex-1" />
+              <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 tracking-wider uppercase">or continue with</span>
+              <div className="h-px bg-gray-150 dark:bg-zinc-800 flex-1" />
             </div>
 
             {/* Google Button */}
             <GoogleButton mode="signup" />
 
             {/* Post signup info */}
-            <div className="bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 rounded-2xl p-4 space-y-2">
-              <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5">
+            <div className="bg-emerald-500/[0.01] dark:bg-emerald-500/[0.02] border border-dashed border-emerald-500/20 dark:border-emerald-500/10 rounded-2xl p-4 space-y-2">
+              <h4 className="text-[11px] font-bold text-gray-900 dark:text-zinc-200 flex items-center gap-1.5">
                 <span>✨</span> What Happens Next?
               </h4>
-              <ol className="list-decimal list-inside text-[10px] text-gray-500 space-y-1 leading-relaxed">
+              <ol className="list-decimal list-inside text-[10px] text-gray-500 dark:text-zinc-400 space-y-1 leading-relaxed">
                 <li>Complete your physical onboarding questionnaire</li>
                 <li>Get automated metabolic calorie calculations</li>
                 <li>Start logging meal photos for instant nutrition analysis</li>
@@ -230,11 +230,11 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <p className="text-center text-xs text-gray-400 font-semibold">
+          <p className="text-center text-xs text-gray-400 dark:text-zinc-500 font-semibold">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+              className="font-bold text-emerald-600 dark:text-emerald-450 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
             >
               Sign In
             </Link>

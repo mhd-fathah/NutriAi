@@ -97,8 +97,8 @@ export default async function DashboardPage() {
       {/* SECTION 2 & 3: CALORIE OVERVIEW + MACRO CARDS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* SECTION 2: CALORIE OVERVIEW */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 flex flex-col items-center justify-center relative overflow-hidden group hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 blur-2xl opacity-50 group-hover:scale-125 transition-transform duration-500" />
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-black/10 p-6 md:p-8 flex flex-col items-center justify-center relative overflow-hidden group hover:shadow-2xl dark:hover:shadow-black/20 hover:shadow-gray-200/50 transition-all duration-300">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 dark:bg-emerald-950/20 rounded-full -mr-16 -mt-16 blur-2xl opacity-50 dark:opacity-20 group-hover:scale-125 transition-transform duration-500" />
           
           <ProgressRing
             percentage={calorieProgress}
@@ -112,14 +112,14 @@ export default async function DashboardPage() {
           />
           
           <div className="mt-6 text-center space-y-1">
-            <p className="text-sm font-bold text-gray-900 tracking-tight">Daily Calories</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-zinc-150 tracking-tight">Daily Calories</p>
             <p className="text-xs text-gray-500">
               {Math.round((user.dailyCalories || 2000) - todayNutrition.calories) > 0 ? (
-                <span className="font-semibold text-emerald-600">
+                <span className="font-semibold text-emerald-600 dark:text-emerald-450">
                   {Math.round((user.dailyCalories || 2000) - todayNutrition.calories)} kcal remaining
                 </span>
               ) : (
-                <span className="font-semibold text-rose-600">
+                <span className="font-semibold text-rose-600 dark:text-rose-400">
                   {Math.abs(Math.round((user.dailyCalories || 2000) - todayNutrition.calories))} kcal over target
                 </span>
               )}
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
             unit="g"
             color="emerald"
             icon="🥩"
-            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100"
+            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 dark:shadow-none hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100 dark:border-zinc-800"
           />
           <NutritionCard
             label="Carbs"
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
             unit="g"
             color="blue"
             icon="🌾"
-            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100"
+            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 dark:shadow-none hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100 dark:border-zinc-800"
           />
           <NutritionCard
             label="Fat"
@@ -154,7 +154,7 @@ export default async function DashboardPage() {
             unit="g"
             color="amber"
             icon="🥑"
-            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100"
+            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 dark:shadow-none hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100 dark:border-zinc-800"
           />
           <NutritionCard
             label="Sugar"
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
             unit="g"
             color="rose"
             icon="🍬"
-            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100"
+            className="rounded-3xl hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-gray-100/40 dark:shadow-none hover:shadow-2xl hover:shadow-gray-200/50 border-gray-100 dark:border-zinc-800"
           />
         </div>
       </div>
@@ -171,13 +171,13 @@ export default async function DashboardPage() {
       {/* SECTION 4 & 5: TODAY'S MEALS + AI INSIGHTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* SECTION 4: TODAY'S MEALS */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-black/10 p-6 md:p-8 hover:shadow-2xl dark:hover:shadow-black/20 hover:shadow-gray-200/50 transition-all duration-300">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 tracking-tight">Today&apos;s Meals</h2>
-              <p className="text-xs text-gray-400">Meals registered throughout the day</p>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Today&apos;s Meals</h2>
+              <p className="text-xs text-gray-400 dark:text-zinc-500">Meals registered throughout the day</p>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
               {todayMeals.length} logged
             </span>
           </div>
@@ -187,14 +187,14 @@ export default async function DashboardPage() {
         </div>
 
         {/* SECTION 5: AI INSIGHTS */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-black/10 p-6 md:p-8 hover:shadow-2xl dark:hover:shadow-black/20 hover:shadow-gray-200/50 transition-all duration-300">
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Sparkles size={16} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 tracking-tight">AI Insights</h2>
-              <p className="text-xs text-gray-400">Personalized diet and coach recommendations</p>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 tracking-tight">AI Insights</h2>
+              <p className="text-xs text-gray-400 dark:text-zinc-500">Personalized diet and coach recommendations</p>
             </div>
           </div>
           <AIInsights tips={latestTips} hasData={todayMeals.length > 0} />
@@ -202,22 +202,22 @@ export default async function DashboardPage() {
       </div>
 
       {/* SECTION 6: ANALYTICS */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-black/10 p-6 md:p-8 hover:shadow-2xl dark:hover:shadow-black/20 hover:shadow-gray-200/50 transition-all duration-300">
         <div className="mb-6">
-          <h2 className="text-lg font-bold text-gray-900 tracking-tight">Weekly Analytics</h2>
-          <p className="text-xs text-gray-400 font-medium">Visual representations of nutrition progression</p>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Weekly Analytics</h2>
+          <p className="text-xs text-gray-400 dark:text-zinc-550 font-medium">Visual representations of nutrition progression</p>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-gray-50/50 border border-gray-100 rounded-2xl p-4">
+          <div className="lg:col-span-2 bg-gray-50/50 dark:bg-zinc-950/40 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4">
             <CaloriesLineChart data={weeklyData} dailyCalories={user.dailyCalories || 2000} />
           </div>
-          <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex items-center justify-center">
+          <div className="bg-gray-50/50 dark:bg-zinc-950/40 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4 flex items-center justify-center">
             <MacroPieChart data={todayNutrition} />
           </div>
         </div>
         
-        <div className="mt-6 bg-gray-50/50 border border-gray-100 rounded-2xl p-4">
+        <div className="mt-6 bg-gray-50/50 dark:bg-zinc-950/40 border border-gray-100 dark:border-zinc-800 rounded-2xl p-4">
           <MacroBarChart data={weeklyData} />
         </div>
       </div>

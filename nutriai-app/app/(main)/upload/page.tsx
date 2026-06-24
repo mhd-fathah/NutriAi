@@ -183,21 +183,21 @@ export default function UploadPage() {
             </div>
           </div>
 
-          <div className="p-6 md:p-8 space-y-6 bg-white">
+          <div className="p-6 md:p-8 space-y-6 bg-white dark:bg-zinc-900">
             {/* NUTRITION METRICS */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {[
-                { label: "Calories", value: result.calories, unit: "kcal", color: "rose", bg: "bg-rose-50/50", border: "border-rose-100/50", text: "text-rose-700" },
-                { label: "Protein", value: result.protein, unit: "g", color: "emerald", bg: "bg-emerald-50/50", border: "border-emerald-100/50", text: "text-emerald-700" },
-                { label: "Carbs", value: result.carbs, unit: "g", color: "blue", bg: "bg-blue-50/50", border: "border-blue-100/50", text: "text-blue-700" },
-                { label: "Fat", value: result.fat, unit: "g", color: "amber", bg: "bg-amber-50/50", border: "border-amber-100/50", text: "text-amber-700" },
-                { label: "Sugar", value: result.sugar, unit: "g", color: "purple", bg: "bg-purple-50/50", border: "border-purple-100/50", text: "text-purple-700" },
-              ].map(({ label, value, unit, border, text }) => (
-                <div key={label} className={cn("rounded-2xl p-4 text-center border bg-white shadow-sm hover:-translate-y-0.5 transition-all duration-200", border)}>
-                  <p className="text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wider">{label}</p>
+                { label: "Calories", value: result.calories, unit: "kcal", color: "rose", bg: "bg-rose-50/50 dark:bg-rose-950/20", border: "border-rose-100/50 dark:border-rose-900/30", text: "text-rose-700 dark:text-rose-400" },
+                { label: "Protein", value: result.protein, unit: "g", color: "emerald", bg: "bg-emerald-50/50 dark:bg-emerald-950/20", border: "border-emerald-100/50 dark:border-emerald-900/30", text: "text-emerald-700 dark:text-emerald-400" },
+                { label: "Carbs", value: result.carbs, unit: "g", color: "blue", bg: "bg-blue-50/50 dark:bg-blue-950/20", border: "border-blue-100/50 dark:border-blue-900/30", text: "text-blue-700 dark:text-blue-400" },
+                { label: "Fat", value: result.fat, unit: "g", color: "amber", bg: "bg-amber-50/50 dark:bg-amber-950/20", border: "border-amber-100/50 dark:border-amber-900/30", text: "text-amber-700 dark:text-amber-400" },
+                { label: "Sugar", value: result.sugar, unit: "g", color: "purple", bg: "bg-purple-50/50 dark:bg-purple-950/20", border: "border-purple-100/50 dark:border-purple-900/30", text: "text-purple-700 dark:text-purple-400" },
+              ].map(({ label, value, unit, bg, border, text }) => (
+                <div key={label} className={cn("rounded-2xl p-4 text-center border shadow-sm hover:-translate-y-0.5 transition-all duration-200", bg, border)}>
+                  <p className="text-xs text-gray-400 dark:text-zinc-500 font-semibold mb-1 uppercase tracking-wider">{label}</p>
                   <p className={cn("text-2xl font-black leading-none", text)}>
                     {Math.round(value)}
-                    <span className="text-xs font-semibold text-gray-400 ml-0.5">{unit}</span>
+                    <span className="text-xs font-semibold text-gray-400 dark:text-zinc-500 ml-0.5">{unit}</span>
                   </p>
                 </div>
               ))}
@@ -205,19 +205,19 @@ export default function UploadPage() {
 
             {/* AI COACH PANEL */}
             {result.aiTips.length > 0 && (
-              <div className="bg-emerald-500/[0.02] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
+              <div className="bg-emerald-500/[0.02] dark:bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                     <Sparkles size={16} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-gray-900">AI Nutrition Coach Insights</h3>
-                    <p className="text-[11px] text-gray-400">Personal recommendations based on this meal</p>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-zinc-100">AI Nutrition Coach Insights</h3>
+                    <p className="text-[11px] text-gray-400 dark:text-zinc-500">Personal recommendations based on this meal</p>
                   </div>
                 </div>
                 <div className="space-y-2.5 pl-1">
                   {result.aiTips.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-xs text-gray-600">
+                    <div key={i} className="flex items-start gap-2.5 text-xs text-gray-600 dark:text-zinc-300">
                       <span className="text-emerald-500 font-bold mt-0.5">✓</span>
                       <p className="leading-relaxed">{tip}</p>
                     </div>
@@ -230,7 +230,7 @@ export default function UploadPage() {
             <div className="flex gap-4 pt-2">
               <Button
                 variant="outline"
-                className="flex-1 py-3.5 rounded-2xl font-bold border-gray-200 text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition-all"
+                className="flex-1 py-3.5 rounded-2xl font-bold border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.98] transition-all"
                 onClick={() => {
                   setSelectedFile(null);
                   setPreview(null);
@@ -287,10 +287,10 @@ export default function UploadPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 space-y-6">
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-none p-6 md:p-8 space-y-6">
         {/* SECTION 2: MEAL TYPE SELECTOR */}
         <div>
-          <p className="text-sm font-bold text-gray-900 mb-3.5 tracking-tight uppercase">Meal Type</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 mb-3.5 tracking-tight uppercase">Meal Type</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {mealTypeOptions.map(({ value, label, icon }) => (
               <button
@@ -300,8 +300,8 @@ export default function UploadPage() {
                 className={cn(
                   "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-300 active:scale-[0.97]",
                   mealType === value
-                    ? "border-emerald-500 bg-emerald-50/50 shadow-lg shadow-emerald-500/5 text-emerald-700"
-                    : "border-gray-100 hover:border-gray-200 text-gray-600 bg-white"
+                    ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10 shadow-lg shadow-emerald-500/5 text-emerald-700 dark:text-emerald-400"
+                    : "border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 text-gray-600 dark:text-zinc-400 bg-white dark:bg-zinc-900"
                 )}
               >
                 <span className="text-2xl transition-transform duration-300 hover:scale-110">{icon}</span>
@@ -319,8 +319,8 @@ export default function UploadPage() {
           onClick={() => !preview && fileInputRef.current?.click()}
           className={cn(
             "relative border-2 border-dashed rounded-3xl transition-all duration-300 overflow-hidden",
-            preview ? "border-transparent shadow-md" : "cursor-pointer border-gray-200 hover:border-emerald-400 hover:bg-emerald-500/[0.01]",
-            dragging ? "border-emerald-500 bg-emerald-50/50" : ""
+            preview ? "border-transparent shadow-md" : "cursor-pointer border-gray-200 dark:border-zinc-800 hover:border-emerald-400 dark:hover:border-emerald-500/30 hover:bg-emerald-500/[0.01]",
+            dragging ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10" : ""
           )}
         >
           {preview ? (
@@ -351,14 +351,14 @@ export default function UploadPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-4">
-              <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-600">
+              <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <Camera className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <p className="text-base font-bold text-gray-900">Upload Meal Photo</p>
-                <p className="text-xs text-gray-400">Drag & drop your file here, or click to browse</p>
+                <p className="text-base font-bold text-gray-900 dark:text-zinc-100">Upload Meal Photo</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">Drag & drop your file here, or click to browse</p>
               </div>
-              <p className="text-[10px] text-gray-400 font-semibold bg-gray-50 border border-gray-100 px-3 py-1 rounded-full uppercase tracking-wider">
+              <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-semibold bg-gray-50 dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800 px-3 py-1 rounded-full uppercase tracking-wider">
                 JPEG, PNG, WebP &bull; max 10MB
               </p>
             </div>
@@ -379,7 +379,7 @@ export default function UploadPage() {
         {!preview && (
           <Button
             variant="outline"
-            className="w-full py-3.5 rounded-2xl font-bold border-gray-200 text-gray-700 hover:bg-gray-50 active:scale-[0.99] transition-all"
+            className="w-full py-3.5 rounded-2xl font-bold border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.99] transition-all"
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload size={16} />
@@ -422,12 +422,12 @@ export default function UploadPage() {
 
       {/* EMPTY ONBOARDING TIPS SECTION */}
       {!preview && !loading && (
-        <div className="bg-emerald-500/[0.01] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
+        <div className="bg-emerald-500/[0.01] dark:bg-emerald-500/[0.005] border border-dashed border-emerald-500/20 rounded-3xl p-6 space-y-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">💡</span>
-            <p className="text-sm font-bold text-gray-900">Tips for Best Analysis Accuracy</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-zinc-100">Tips for Best Analysis Accuracy</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-500">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-500 dark:text-zinc-400">
             <p className="flex items-center gap-1.5">&bull; Take photo in bright, natural light</p>
             <p className="flex items-center gap-1.5">&bull; Keep all food centered in frame</p>
             <p className="flex items-center gap-1.5">&bull; Use a clear top-down angle</p>

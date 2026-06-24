@@ -14,14 +14,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="text-sm font-medium text-gray-700"
+            className="text-sm font-medium text-gray-700 dark:text-zinc-350"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">
               {icon}
             </span>
           )}
@@ -29,13 +29,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={id}
             className={cn(
-              "w-full rounded-xl border bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400",
+              "w-full rounded-xl border bg-white dark:bg-zinc-900 px-4 py-3 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500",
               "transition-all duration-200 outline-none",
-              "focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20",
-              "disabled:opacity-50 disabled:bg-gray-50",
+              "focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-500/10",
+              "disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-zinc-950",
               error
-                ? "border-red-400 focus:border-red-400 focus:ring-red-400/20"
-                : "border-gray-200 hover:border-gray-300",
+                ? "border-red-400 dark:border-red-500/50 focus:border-red-400 focus:ring-red-400/20"
+                : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700",
               icon ? "pl-10" : "",
               className
             )}

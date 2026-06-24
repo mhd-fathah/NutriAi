@@ -25,11 +25,11 @@ export default function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-gray-100 shadow-sm",
+        "rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm dark:shadow-none",
         glass
-          ? "bg-white/75 backdrop-blur-sm"
-          : "bg-white",
-        hover && "hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer",
+          ? "bg-white/75 dark:bg-zinc-900/75 backdrop-blur-sm"
+          : "bg-white dark:bg-zinc-900",
+        hover && "hover:shadow-md dark:hover:shadow-none hover:-translate-y-0.5 transition-all duration-200 cursor-pointer",
         paddings[padding],
         className
       )}

@@ -125,30 +125,30 @@ function LoginForm() {
       </div>
 
       {/* RIGHT PANEL: LOGIN FORM */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 md:px-12 bg-gray-50/50 min-h-screen">
+      <div className="flex-1 flex flex-col justify-center items-center px-6 py-12 md:px-12 bg-gray-50/50 dark:bg-zinc-950 min-h-screen">
         <div className="w-full max-w-md space-y-8 animate-fade-in-up">
           {/* Mobile brand header */}
           <div className="flex lg:hidden flex-col items-center text-center space-y-3 mb-4">
             <Logo size={48} />
             <div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight">NutriAI</h2>
-              <p className="text-xs font-bold text-emerald-600 tracking-wider uppercase">AI Nutrition Tracker</p>
+              <h2 className="text-2xl font-black text-gray-900 dark:text-zinc-100 tracking-tight">NutriAI</h2>
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tracking-wider uppercase">AI Nutrition Tracker</p>
             </div>
           </div>
 
           {/* Form container */}
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-100/40 p-6 md:p-8 space-y-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-xl shadow-gray-100/40 dark:shadow-black/25 p-6 md:p-8 space-y-6">
             <div className="space-y-1.5">
-              <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Welcome Back </h3>
-              <p className="text-xs text-gray-400">Continue your automated nutrition journey</p>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Welcome Back </h3>
+              <p className="text-xs text-gray-400 dark:text-zinc-500">Continue your automated nutrition journey</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Email */}
               <div className="space-y-1.5">
-                <label htmlFor="email" className="text-xs font-bold text-gray-700 uppercase tracking-wider">Email</label>
+                <label htmlFor="email" className="text-xs font-bold text-gray-700 dark:text-zinc-400 uppercase tracking-wider">Email</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">
                     <Mail className="w-4 h-4" />
                   </span>
                   <input
@@ -157,9 +157,9 @@ function LoginForm() {
                     placeholder="you@example.com"
                     autoComplete="email"
                     className={cn(
-                      "w-full rounded-xl border bg-white pl-10 pr-4 py-3 text-sm text-gray-900 placeholder-gray-400",
-                      "transition-all duration-300 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10",
-                      errors.email ? "border-red-400 focus:border-red-400 focus:ring-red-500/10" : "border-gray-100 hover:border-gray-200"
+                      "w-full rounded-xl border bg-white dark:bg-zinc-900 pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500",
+                      "transition-all duration-300 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:focus:ring-emerald-500/5",
+                      errors.email ? "border-red-400 dark:border-red-500/50 focus:border-red-400 focus:ring-red-500/10" : "border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700"
                     )}
                     {...register("email")}
                   />
@@ -169,9 +169,9 @@ function LoginForm() {
 
               {/* Password */}
               <div className="space-y-1.5">
-                <label htmlFor="password" className="text-xs font-bold text-gray-700 uppercase tracking-wider">Password</label>
+                <label htmlFor="password" className="text-xs font-bold text-gray-700 dark:text-zinc-400 uppercase tracking-wider">Password</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">
                     <Lock className="w-4 h-4" />
                   </span>
                   <input
@@ -180,16 +180,16 @@ function LoginForm() {
                     placeholder="••••••••"
                     autoComplete="current-password"
                     className={cn(
-                      "w-full rounded-xl border bg-white pl-10 pr-12 py-3 text-sm text-gray-900 placeholder-gray-400",
-                      "transition-all duration-300 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10",
-                      errors.password ? "border-red-400 focus:border-red-400 focus:ring-red-500/10" : "border-gray-100 hover:border-gray-200"
+                      "w-full rounded-xl border bg-white dark:bg-zinc-900 pl-10 pr-12 py-3 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500",
+                      "transition-all duration-300 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:focus:ring-emerald-500/5",
+                      errors.password ? "border-red-400 dark:border-red-500/50 focus:border-red-400 focus:ring-red-500/10" : "border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700"
                     )}
                     {...register("password")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -201,10 +201,10 @@ function LoginForm() {
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 rounded border-gray-200 accent-emerald-500 cursor-pointer"
+                    className="w-4 h-4 rounded border-gray-200 dark:border-zinc-800 accent-emerald-500 cursor-pointer"
                     {...register("rememberMe")}
                   />
-                  <span className="text-xs text-gray-500 font-semibold">Remember me</span>
+                  <span className="text-xs text-gray-500 dark:text-zinc-400 font-semibold">Remember me</span>
                 </label>
               </div>
 
@@ -221,27 +221,27 @@ function LoginForm() {
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-4">
-              <div className="h-px bg-gray-150 flex-1" />
-              <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">or continue with</span>
-              <div className="h-px bg-gray-150 flex-1" />
+              <div className="h-px bg-gray-150 dark:bg-zinc-800 flex-1" />
+              <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 tracking-wider uppercase">or continue with</span>
+              <div className="h-px bg-gray-150 dark:bg-zinc-800 flex-1" />
             </div>
 
             {/* Google Button */}
             <GoogleButton mode="signin" />
 
             {/* Social proof badges */}
-            <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-4 text-[10px] text-gray-400 font-bold tracking-wider uppercase">
+            <div className="flex items-center justify-between gap-2 border-t border-gray-100 dark:border-zinc-800 pt-4 text-[10px] text-gray-400 dark:text-zinc-555 font-bold tracking-wider uppercase">
               <span className="flex items-center gap-1"><Sparkles size={11} className="text-emerald-500" /> AI Insights</span>
               <span className="flex items-center gap-1"><TrendingUp size={11} className="text-blue-500" /> Smart Tracking</span>
               <span className="flex items-center gap-1"><ShieldCheck size={11} className="text-amber-500" /> Secure Auth</span>
             </div>
           </div>
 
-          <p className="text-center text-xs text-gray-400 font-semibold">
+          <p className="text-center text-xs text-gray-400 dark:text-zinc-500 font-semibold">
             New to NutriAI?{" "}
             <Link
               href="/signup"
-              className="font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+              className="font-bold text-emerald-600 dark:text-emerald-450 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
             >
               Create your account
             </Link>
@@ -255,8 +255,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
-        <p className="text-sm font-semibold text-gray-500 animate-pulse">Loading auth...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50/50 dark:bg-zinc-950">
+        <p className="text-sm font-semibold text-gray-500 dark:text-zinc-400 animate-pulse">Loading auth...</p>
       </div>
     }>
       <LoginForm />

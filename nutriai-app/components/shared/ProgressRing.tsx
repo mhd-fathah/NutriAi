@@ -53,8 +53,9 @@ export default function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={bgColor}
+          stroke="currentColor"
           strokeWidth={strokeWidth}
+          className="text-gray-100 dark:text-zinc-800"
         />
         <circle
           ref={circleRef}
@@ -62,11 +63,12 @@ export default function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke="currentColor"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={animate ? circumference : offset}
+          className="text-emerald-500 dark:text-emerald-400"
           style={
             animate
               ? undefined
@@ -76,12 +78,12 @@ export default function ProgressRing({
       </svg>
       <div className="absolute flex flex-col items-center justify-center text-center">
         {label && (
-          <span className="text-2xl font-bold text-gray-900 leading-none">{label}</span>
+          <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100 leading-none">{label}</span>
         )}
         {sublabel && (
-          <span className="text-xs text-gray-500 mt-1">{sublabel}</span>
+          <span className="text-xs text-gray-500 dark:text-zinc-450 mt-1">{sublabel}</span>
         )}
-        <span className="text-sm font-semibold text-emerald-600 mt-0.5">
+        <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
           {clampedPercentage}%
         </span>
       </div>
