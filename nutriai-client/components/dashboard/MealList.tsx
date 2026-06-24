@@ -120,19 +120,46 @@ export function MealCard({ meal }: { meal: MealRecord }) {
           </div>
 
           {/* AI Tips / Insights */}
-          {meal.aiTips && meal.aiTips.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                <Sparkles size={14} />
-                <span>Coach Insights</span>
+          {meal.aiTips && meal.aiTips.length > 0 && (() => {
+            let parsedCoaching: { summary: string; recommendations: Array<{ category: string; text: string; why: string }> } | null = null;
+            try {
+              if (meal.aiTips[0]?.startsWith("{")) {
+                parsedCoaching = JSON.parse(meal.aiTips[0]);
+              }
+            } catch (e) {
+              console.error("Failed to parse meal coaching tips JSON", e);
+            }
+
+            return (
+              <div className="space-y-2 border-t border-gray-150/40 dark:border-zinc-800/40 pt-3 mt-1">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <Sparkles size={14} />
+                  <span>Coach Insights</span>
+                </div>
+                {parsedCoaching ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-700 dark:text-zinc-300 italic font-medium">{parsedCoaching.summary}</p>
+                    <div className="space-y-2 pl-2 border-l-2 border-emerald-500/20 dark:border-emerald-500/10">
+                      {parsedCoaching.recommendations.map((rec, idx) => (
+                        <div key={idx} className="text-xs">
+                          <span className="font-bold text-gray-800 dark:text-zinc-200">
+                            [{rec.category}] {rec.text}
+                          </span>{" "}
+                          <span className="text-gray-400 dark:text-zinc-550 font-medium">- {rec.why}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <ul className="list-disc pl-4 space-y-1 text-xs text-gray-600 dark:text-zinc-350">
+                    {meal.aiTips.map((tip, idx) => (
+                      <li key={idx}>{tip}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <ul className="list-disc pl-4 space-y-1 text-xs text-gray-600 dark:text-zinc-300">
-                {meal.aiTips.map((tip, idx) => (
-                  <li key={idx}>{tip}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
     </div>
@@ -157,8 +184,8 @@ export function TodayMealsList({ meals }: { meals: MealRecord[] }) {
 
   return (
     <div className="space-y-3">
-      {meals.map((meal) => (
-        <MealCard key={meal.id || meal._id} meal={meal} />
+      {meals.map((meal, idx) => (
+        <MealCard key={meal._id || meal.id || `meal-${idx}`} meal={meal} />
       ))}
     </div>
   );

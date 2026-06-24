@@ -31,11 +31,31 @@ export interface IFoodAnalysisProvider {
   }>;
 
   generateNutritionTips(context: {
-    goal: string;
-    dailyCalories: number;
-    consumedCalories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
+    user: {
+      age?: number;
+      gender?: string;
+      weight?: number;
+      height?: number;
+      goal: string;
+      dailyCalories: number;
+      dailyProtein: number;
+      dailyCarbs: number;
+      dailyFat: number;
+    };
+    todayConsumption: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      sugar: number;
+    };
+    mealHistory: Array<{
+      mealType: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+      foodName: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    }>;
   }): Promise<string[]>;
 }

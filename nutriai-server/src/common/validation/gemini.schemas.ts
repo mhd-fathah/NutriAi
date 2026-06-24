@@ -27,6 +27,24 @@ export const MultiStageNutritionSchema = z.object({
   confidence: z.coerce.number().min(0).max(100).default(80),
 });
 
+export const CoachingRecommendationSchema = z.object({
+  category: z.enum([
+    'Protein Boost',
+    'Calorie Boost',
+    'Weight Loss Tip',
+    'Healthy Snack Suggestion',
+    'Hydration Tip',
+    'General Coaching',
+  ]),
+  text: z.string(),
+  why: z.string(),
+});
+
+export const PersonalizedCoachingSchema = z.object({
+  summary: z.string(),
+  recommendations: z.array(CoachingRecommendationSchema),
+});
+
 export const NutritionTipsSchema = z.object({
   tips: z.array(z.string()).min(1).max(3),
 });
@@ -34,3 +52,5 @@ export const NutritionTipsSchema = z.object({
 export type FoodItemAnalysis = z.infer<typeof FoodItemAnalysisSchema>;
 export type MultiStageNutrition = z.infer<typeof MultiStageNutritionSchema>;
 export type NutritionTips = z.infer<typeof NutritionTipsSchema>;
+export type CoachingRecommendation = z.infer<typeof CoachingRecommendationSchema>;
+export type PersonalizedCoaching = z.infer<typeof PersonalizedCoachingSchema>;

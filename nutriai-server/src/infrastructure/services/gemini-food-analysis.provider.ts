@@ -8,6 +8,8 @@ import {
   NutritionTipsSchema,
   MultiStageNutrition,
   NutritionTips,
+  PersonalizedCoachingSchema,
+  PersonalizedCoaching,
 } from '../../common/validation/gemini.schemas';
 
 const NUTRITION_PROMPT = `You are an expert nutritionist and food analyst. Analyze this food image carefully.
@@ -61,15 +63,34 @@ const NUTRITION_RESPONSE_SCHEMA = {
   required: ['foods', 'totals', 'confidence'],
 };
 
-const TIPS_RESPONSE_SCHEMA = {
+const COACHING_RESPONSE_SCHEMA = {
   type: 'object',
   properties: {
-    tips: {
+    summary: { type: 'string' },
+    recommendations: {
       type: 'array',
-      items: { type: 'string' },
+      items: {
+        type: 'object',
+        properties: {
+          category: {
+            type: 'string',
+            enum: [
+              'Protein Boost',
+              'Calorie Boost',
+              'Weight Loss Tip',
+              'Healthy Snack Suggestion',
+              'Hydration Tip',
+              'General Coaching',
+            ],
+          },
+          text: { type: 'string' },
+          why: { type: 'string' },
+        },
+        required: ['category', 'text', 'why'],
+      },
     },
   },
-  required: ['tips'],
+  required: ['summary', 'recommendations'],
 };
 
 @Injectable()
@@ -291,12 +312,32 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
   }
 
   async generateNutritionTips(context: {
-    goal: string;
-    dailyCalories: number;
-    consumedCalories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
+    user: {
+      age?: number;
+      gender?: string;
+      weight?: number;
+      height?: number;
+      goal: string;
+      dailyCalories: number;
+      dailyProtein: number;
+      dailyCarbs: number;
+      dailyFat: number;
+    };
+    todayConsumption: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      sugar: number;
+    };
+    mealHistory: Array<{
+      mealType: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+      foodName: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    }>;
   }): Promise<string[]> {
     const goalLabels: Record<string, string> = {
       lose_weight: 'Lose Weight',
@@ -304,15 +345,44 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
       gain_weight: 'Gain Weight',
     };
 
-    const prompt = `You are a professional nutrition coach. Based on the user's data below, provide exactly 3 short, actionable nutrition recommendations.
+    const prompt = `You are a certified nutrition coach. Analyze the user's details, nutrition targets, and current intake.
+Calculate deficiencies and excesses.
+Provide practical food recommendations with quantities.
+Be concise and actionable.
 
-User Goal: ${goalLabels[context.goal] || context.goal}
-Target Calories: ${context.dailyCalories} kcal
-Consumed Today: ${context.consumedCalories} kcal
-Remaining: ${context.dailyCalories - context.consumedCalories} kcal
-Protein Today: ${context.protein}g
-Carbs Today: ${context.carbs}g
-Fat Today: ${context.fat}g`;
+User Profile:
+- Age: ${context.user.age || 'N/A'}
+- Gender: ${context.user.gender || 'N/A'}
+- Weight: ${context.user.weight || 'N/A'} kg
+- Height: ${context.user.height || 'N/A'} cm
+- Goal: ${goalLabels[context.user.goal] || context.user.goal}
+- Target Calories: ${context.user.dailyCalories} kcal
+- Target Protein: ${context.user.dailyProtein}g
+- Target Carbs: ${context.user.dailyCarbs}g
+- Target Fat: ${context.user.dailyFat}g
+
+Today's Consumption:
+- Calories: ${context.todayConsumption.calories} kcal
+- Protein: ${context.todayConsumption.protein}g
+- Carbs: ${context.todayConsumption.carbs}g
+- Fat: ${context.todayConsumption.fat}g
+- Sugar: ${context.todayConsumption.sugar}g
+
+Today's Meals:
+${context.mealHistory.map((m) => `- [${m.mealType.toUpperCase()}] ${m.foodName} (${m.calories} kcal)`).join('\n')}
+
+Quality Rules:
+1. Be specific. Mention exact foods and approximate quantities.
+2. Reference the user's deficits or excesses in targets (e.g. if they are 90g below protein target, suggest Chicken Breast, Eggs, Milk, Greek Yogurt with quantities).
+3. Do not give generic advice like "Protein intake is low" or "Add more protein". State the actual deficit and recommended foods.
+4. Categorize each recommendation precisely. Supported categories:
+   - 'Protein Boost' (if protein deficit is high)
+   - 'Calorie Boost' (if calorie deficit is high)
+   - 'Weight Loss Tip' (if user's goal is lose_weight)
+   - 'Healthy Snack Suggestion' (general nutrient-dense snacks)
+   - 'Hydration Tip' (liquids/water/fluids suggestion)
+   - 'General Coaching' (any other tips)
+`;
 
     const retryOptions = {
       maxAttempts: 2,
@@ -326,7 +396,7 @@ Fat Today: ${context.fat}g`;
 
     for (const modelName of modelsToTry) {
       try {
-        this.logger.log(`Generating tips with model: ${modelName}`);
+        this.logger.log(`Generating personalized tips with model: ${modelName}`);
         const result = await retryWithBackoff(
           async () => {
             const genAI = this.getGenAI();
@@ -334,32 +404,49 @@ Fat Today: ${context.fat}g`;
               model: modelName,
               generationConfig: {
                 responseMimeType: 'application/json',
-                responseSchema: TIPS_RESPONSE_SCHEMA as any,
+                responseSchema: COACHING_RESPONSE_SCHEMA as any,
               },
             });
             const res = await model.generateContent(prompt);
             const text = res.response.text();
             const parsed = extractJSON<any>(text);
-            const validated = NutritionTipsSchema.parse(parsed);
-            return validated.tips;
+            const validated = PersonalizedCoachingSchema.parse(parsed);
+            return validated;
           },
           retryOptions,
           this.logger,
-          `GeminiTipsGeneration-${modelName}`,
+          `GeminiPersonalizedCoaching-${modelName}`,
         );
 
-        if (result && Array.isArray(result) && result.length > 0) {
-          return result.slice(0, 3);
+        if (result && result.recommendations && result.recommendations.length > 0) {
+          return [JSON.stringify(result)];
         }
       } catch (e) {
-        this.logger.error(`Tips generation with ${modelName} failed: ${e.message}`);
+        this.logger.error(`Personalized coaching tips generation with ${modelName} failed: ${e.message}`);
       }
     }
 
-    return [
-      'Track your meals consistently for better insights.',
-      'Aim to drink at least 8 glasses of water today.',
-      'Include a variety of protein sources in your diet.',
-    ];
+    const defaultFallback: PersonalizedCoaching = {
+      summary: 'Stay consistent on your goals and keep tracking your meals.',
+      recommendations: [
+        {
+          category: 'General Coaching',
+          text: 'Include a variety of protein sources in your diet like chicken breast, fish, or eggs.',
+          why: 'To support daily muscle maintenance and satiety.',
+        },
+        {
+          category: 'Hydration Tip',
+          text: 'Aim to drink at least 8 glasses of water today.',
+          why: 'To optimize metabolism, hydration, and digestion.',
+        },
+        {
+          category: 'Healthy Snack Suggestion',
+          text: 'Try having a handful of almonds (30g) or fruit as an afternoon snack.',
+          why: 'For healthy fats, vitamins, and sustainable energy.',
+        },
+      ],
+    };
+
+    return [JSON.stringify(defaultFallback)];
   }
 }

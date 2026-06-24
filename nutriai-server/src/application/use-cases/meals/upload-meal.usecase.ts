@@ -65,23 +65,55 @@ export class UploadMealUseCase {
         protein: acc.protein + m.protein,
         carbs: acc.carbs + m.carbs,
         fat: acc.fat + m.fat,
+        sugar: acc.sugar + (m.sugar || 0),
       }),
-      { calories: 0, protein: 0, carbs: 0, fat: 0 },
+      { calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0 },
     );
 
     const totalCalories = consumed.calories + nutrition.calories;
     const totalProtein = consumed.protein + nutrition.protein;
     const totalCarbs = consumed.carbs + nutrition.carbs;
     const totalFat = consumed.fat + nutrition.fat;
+    const totalSugar = consumed.sugar + (nutrition.sugar || 0);
 
     // 5. Generate Coaching Tips
     const tips = await this.foodAnalysisProvider.generateNutritionTips({
-      goal: user.goal || 'maintain_weight',
-      dailyCalories: user.dailyCalories || 2000,
-      consumedCalories: totalCalories,
-      protein: totalProtein,
-      carbs: totalCarbs,
-      fat: totalFat,
+      user: {
+        age: user.age,
+        gender: user.gender,
+        weight: user.weight,
+        height: user.height,
+        goal: user.goal || 'maintain_weight',
+        dailyCalories: user.dailyCalories || 2000,
+        dailyProtein: user.dailyProtein || 150,
+        dailyCarbs: user.dailyCarbs || 250,
+        dailyFat: user.dailyFat || 70,
+      },
+      todayConsumption: {
+        calories: totalCalories,
+        protein: totalProtein,
+        carbs: totalCarbs,
+        fat: totalFat,
+        sugar: totalSugar,
+      },
+      mealHistory: [
+        ...todayMeals.map((m) => ({
+          mealType: m.mealType,
+          foodName: m.foodName,
+          calories: m.calories,
+          protein: m.protein,
+          carbs: m.carbs,
+          fat: m.fat,
+        })),
+        {
+          mealType,
+          foodName: nutrition.foodName,
+          calories: nutrition.calories,
+          protein: nutrition.protein,
+          carbs: nutrition.carbs,
+          fat: nutrition.fat,
+        },
+      ],
     });
 
     // 6. Save meal to database
