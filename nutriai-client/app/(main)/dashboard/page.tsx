@@ -5,6 +5,7 @@ import NutritionCard from "@/components/shared/NutritionCard";
 import ProgressRing from "@/components/shared/ProgressRing";
 import { TodayMealsList } from "@/components/dashboard/MealList";
 import AIInsights from "@/components/dashboard/AIInsights";
+
 import { CaloriesLineChart, MacroBarChart, MacroPieChart } from "@/components/analytics/Charts";
 import { getGreeting, getProgressPercentage, formatCalories } from "@/utils";
 import { SkeletonCard } from "@/components/shared/Loader";

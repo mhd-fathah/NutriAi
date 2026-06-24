@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn, getProgressPercentage } from "@/utils";
 
 interface NutritionCardProps {
@@ -10,7 +11,7 @@ interface NutritionCardProps {
   className?: string;
 }
 
-export default function NutritionCard({
+function NutritionCard({
   label,
   consumed,
   target,
@@ -63,3 +64,5 @@ export default function NutritionCard({
     </div>
   );
 }
+
+export default memo(NutritionCard);

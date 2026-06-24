@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, memo } from "react";
 import { cn } from "@/utils";
 
 interface ProgressRingProps {
@@ -15,7 +15,7 @@ interface ProgressRingProps {
   animate?: boolean;
 }
 
-export default function ProgressRing({
+function ProgressRing({
   percentage,
   size = 160,
   strokeWidth = 12,
@@ -81,7 +81,7 @@ export default function ProgressRing({
           <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100 leading-none">{label}</span>
         )}
         {sublabel && (
-          <span className="text-xs text-gray-500 dark:text-zinc-450 mt-1">{sublabel}</span>
+          <span className="text-xs text-gray-550 dark:text-zinc-450 mt-1">{sublabel}</span>
         )}
         <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
           {clampedPercentage}%
@@ -90,3 +90,5 @@ export default function ProgressRing({
     </div>
   );
 }
+
+export default memo(ProgressRing);

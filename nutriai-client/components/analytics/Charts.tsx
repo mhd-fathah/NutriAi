@@ -18,7 +18,7 @@ import {
 import { WeeklyDataPoint } from "@/types";
 import Card from "@/components/shared/Card";
 import { useTheme } from "next-themes";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 
 interface WeeklyChartsProps {
   data: WeeklyDataPoint[];
@@ -27,7 +27,7 @@ interface WeeklyChartsProps {
 
 const COLORS = ["#10B981", "#3B82F6", "#F59E0B", "#EF4444"];
 
-export function CaloriesLineChart({ data, dailyCalories }: WeeklyChartsProps) {
+export const CaloriesLineChart = memo(function CaloriesLineChart({ data, dailyCalories }: WeeklyChartsProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -86,9 +86,9 @@ export function CaloriesLineChart({ data, dailyCalories }: WeeklyChartsProps) {
       </ResponsiveContainer>
     </Card>
   );
-}
+});
 
-export function MacroBarChart({ data }: { data: WeeklyDataPoint[] }) {
+export const MacroBarChart = memo(function MacroBarChart({ data }: { data: WeeklyDataPoint[] }) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -131,7 +131,7 @@ export function MacroBarChart({ data }: { data: WeeklyDataPoint[] }) {
       </ResponsiveContainer>
     </Card>
   );
-}
+});
 
 interface MacroPieData {
   protein: number;
@@ -139,7 +139,7 @@ interface MacroPieData {
   fat: number;
 }
 
-export function MacroPieChart({ data }: { data: MacroPieData }) {
+export const MacroPieChart = memo(function MacroPieChart({ data }: { data: MacroPieData }) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -202,4 +202,4 @@ export function MacroPieChart({ data }: { data: MacroPieData }) {
       </ResponsiveContainer>
     </Card>
   );
-}
+});

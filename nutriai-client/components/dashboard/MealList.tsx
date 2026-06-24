@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import Image from "next/image";
 import { formatTime } from "@/utils";
 import { MealRecord } from "@/types";
@@ -10,7 +10,7 @@ import Link from "next/link";
 import Button from "@/components/shared/Button";
 import { ChevronDown, ChevronUp, Sparkles, Shield, AlertTriangle, ShieldCheck } from "lucide-react";
 
-export function MealCard({ meal }: { meal: MealRecord }) {
+export const MealCard = memo(function MealCard({ meal }: { meal: MealRecord }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const mealInfo = MEAL_TYPES[meal.mealType];
 
@@ -164,9 +164,9 @@ export function MealCard({ meal }: { meal: MealRecord }) {
       )}
     </div>
   );
-}
+});
 
-export function TodayMealsList({ meals }: { meals: MealRecord[] }) {
+export const TodayMealsList = memo(function TodayMealsList({ meals }: { meals: MealRecord[] }) {
   if (meals.length === 0) {
     return (
       <EmptyState
@@ -189,4 +189,4 @@ export function TodayMealsList({ meals }: { meals: MealRecord[] }) {
       ))}
     </div>
   );
-}
+});

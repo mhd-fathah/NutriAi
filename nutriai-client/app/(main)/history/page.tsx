@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import Image from "next/image";
 import { mealService } from "@/services/meal.service";
 import { HistoryData, MealRecord } from "@/types";
 import { formatDate, formatTime } from "@/utils";
 import { MEAL_TYPES } from "@/constants";
-import { CaloriesLineChart } from "@/components/analytics/Charts";
+import dynamic from "next/dynamic";
+
+const CaloriesLineChart = dynamic(
+  () => import("@/components/analytics/Charts").then((mod) => mod.CaloriesLineChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-[200px] w-full animate-pulse bg-gray-50/50 dark:bg-zinc-950/40 border border-gray-100 dark:border-zinc-800 rounded-2xl" />
+  }
+);
 import EmptyState from "@/components/shared/EmptyState";
 import { SkeletonCard } from "@/components/shared/Loader";
 import { cn } from "@/utils";
@@ -22,7 +30,7 @@ const tabs: { value: Period; label: string }[] = [
   { value: "monthly", label: "This Month" },
 ];
 
-function SummaryCard({ label, value, unit, icon, color }: { label: string; value: number; unit: string; icon: string; color: "emerald" | "blue" | "amber" | "rose" | "purple" }) {
+const SummaryCard = memo(function SummaryCard({ label, value, unit, icon, color }: { label: string; value: number; unit: string; icon: string; color: "emerald" | "blue" | "amber" | "rose" | "purple" }) {
   const colorMap = {
     emerald: { bg: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400", border: "border-emerald-100/50 dark:border-emerald-900/30" },
     blue: { bg: "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400", border: "border-blue-100/50 dark:border-blue-900/30" },
@@ -49,9 +57,9 @@ function SummaryCard({ label, value, unit, icon, color }: { label: string; value
       </div>
     </div>
   );
-}
+});
 
-function MealHistoryCard({ meal }: { meal: MealRecord }) {
+const MealHistoryCard = memo(function MealHistoryCard({ meal }: { meal: MealRecord }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const mealInfo = MEAL_TYPES[meal.mealType];
 
@@ -210,7 +218,7 @@ function MealHistoryCard({ meal }: { meal: MealRecord }) {
       )}
     </div>
   );
-}
+});
 
 export default function HistoryPage() {
   const [period, setPeriod] = useState<Period>("daily");
@@ -238,22 +246,21 @@ export default function HistoryPage() {
   }, [period]);
 
   // Build weekly chart data from meal history
-  const chartData = data
-    ? (() => {
-        const map = new Map<string, { date: string; calories: number; protein: number; carbs: number; fat: number }>();
-        data.meals.forEach((m) => {
-          const key = m.createdAt.split("T")[0];
-          const day = new Date(m.createdAt).toLocaleDateString("en-US", { weekday: "short" });
-          const existing = map.get(key) || { date: day, calories: 0, protein: 0, carbs: 0, fat: 0 };
-          existing.calories += m.calories;
-          existing.protein += m.protein;
-          existing.carbs += m.carbs;
-          existing.fat += m.fat;
-          map.set(key, existing);
-        });
-        return Array.from(map.values());
-      })()
-    : [];
+  const chartData = useMemo(() => {
+    if (!data) return [];
+    const map = new Map<string, { date: string; calories: number; protein: number; carbs: number; fat: number }>();
+    data.meals.forEach((m) => {
+      const key = m.createdAt.split("T")[0];
+      const day = new Date(m.createdAt).toLocaleDateString("en-US", { weekday: "short" });
+      const existing = map.get(key) || { date: day, calories: 0, protein: 0, carbs: 0, fat: 0 };
+      existing.calories += m.calories;
+      existing.protein += m.protein;
+      existing.carbs += m.carbs;
+      existing.fat += m.fat;
+      map.set(key, existing);
+    });
+    return Array.from(map.values());
+  }, [data]);
 
   return (
     <div className="space-y-8 animate-fade-in-up pb-10">

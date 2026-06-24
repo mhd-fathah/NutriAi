@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Sparkles, Activity, Award, Flame, Apple, Heart, Droplets } from "lucide-react";
 
 interface CoachingRecommendation {
@@ -57,7 +58,7 @@ const getCategoryStyles = (category: string) => {
   }
 };
 
-export default function AIInsights({ tips, hasData }: AIInsightsProps) {
+function AIInsights({ tips, hasData }: AIInsightsProps) {
   if (!hasData || tips.length === 0) {
     return (
       <div className="space-y-2.5">
@@ -139,3 +140,5 @@ export default function AIInsights({ tips, hasData }: AIInsightsProps) {
     </div>
   );
 }
+
+export default memo(AIInsights);
