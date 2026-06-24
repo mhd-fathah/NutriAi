@@ -12,7 +12,7 @@ import { SkeletonCard } from "@/components/shared/Loader";
 import { cn } from "@/utils";
 import Link from "next/link";
 import Button from "@/components/shared/Button";
-import { Calendar, Flame, Layers, Sparkles, TrendingUp } from "lucide-react";
+import { Calendar, Flame, Layers, Sparkles, TrendingUp, ChevronDown, ChevronUp, ShieldCheck, Shield, AlertTriangle } from "lucide-react";
 
 type Period = "daily" | "weekly" | "monthly";
 
@@ -52,39 +52,135 @@ function SummaryCard({ label, value, unit, icon, color }: { label: string; value
 }
 
 function MealHistoryCard({ meal }: { meal: MealRecord }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const mealInfo = MEAL_TYPES[meal.mealType];
+
+  const confidence = meal.confidence ?? 100;
+  let confidenceColor = "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
+  let confidenceLabel = "High Confidence";
+  let ConfidenceIcon = ShieldCheck;
+
+  if (confidence < 70) {
+    confidenceColor = "text-red-500 bg-red-500/10 border-red-500/20";
+    confidenceLabel = "Low Confidence";
+    ConfidenceIcon = AlertTriangle;
+  } else if (confidence < 90) {
+    confidenceColor = "text-amber-500 bg-amber-500/10 border-amber-500/20";
+    confidenceLabel = "Medium Confidence";
+    ConfidenceIcon = Shield;
+  }
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 hover:shadow-xl dark:hover:shadow-none transition-all duration-300 group">
-      <div className="flex items-center gap-4 min-w-0">
-        <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 shadow-inner">
-          <Image 
-            src={meal.imageUrl ? meal.imageUrl : "/images/food-placeholder.jpg"} 
-            alt={meal.foodName} 
-            fill 
-            className="object-cover group-hover:scale-105 transition-transform duration-500" 
-            sizes="80px" 
-          />
+    <div 
+      className="p-5 bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+      onClick={() => setIsExpanded(!isExpanded)}
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800 border border-gray-100 dark:border-zinc-800 shadow-inner">
+            <Image 
+              src={meal.imageUrl ? meal.imageUrl : "/images/food-placeholder.jpg"} 
+              alt={meal.foodName} 
+              fill 
+              className="object-cover hover:scale-105 transition-transform duration-500" 
+              sizes="80px" 
+            />
+          </div>
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <p className="font-bold text-gray-900 dark:text-zinc-100 text-lg tracking-tight truncate">{meal.foodName}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 text-xs bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-semibold">
+                {mealInfo?.icon} {mealInfo?.label}
+              </span>
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">{formatDate(meal.createdAt)}</span>
+              <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">&bull; {formatTime(meal.createdAt)}</span>
+            </div>
+          </div>
         </div>
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <p className="font-bold text-gray-900 dark:text-zinc-100 text-lg tracking-tight truncate">{meal.foodName}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1 text-xs bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 px-2.5 py-1 rounded-full font-semibold">
-              {mealInfo?.icon} {mealInfo?.label}
-            </span>
-            <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">{formatDate(meal.createdAt)}</span>
-            <span className="text-xs font-medium text-gray-400 dark:text-zinc-500">&bull; {formatTime(meal.createdAt)}</span>
+        
+        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-50 dark:border-zinc-800/80 flex-shrink-0">
+          <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">{meal.calories} kcal</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">P: {meal.protein}g</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400">C: {meal.carbs}g</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400">F: {meal.fat}g</span>
+          </div>
+          <div className="hidden sm:block text-gray-400 dark:text-zinc-500 mt-1">
+            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
         </div>
       </div>
-      
-      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-50 dark:border-zinc-800/80 flex-shrink-0">
-        <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">{meal.calories} kcal</span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">P: {meal.protein}g</span>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400">C: {meal.carbs}g</span>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400">F: {meal.fat}g</span>
+
+      {isExpanded && (
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800/80 space-y-4 animate-fade-in">
+          {/* Confidence Score & Version */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border ${confidenceColor} font-medium`}>
+              <ConfidenceIcon size={12} />
+              {confidenceLabel} ({confidence}%)
+            </span>
+            {meal.analysisVersion && (
+              <span className="text-[10px] text-gray-400 dark:text-zinc-500 font-mono">
+                AI Engine v{meal.analysisVersion}
+              </span>
+            )}
+          </div>
+
+          {/* Detailed Portion breakdown */}
+          {meal.foods && meal.foods.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-zinc-500">
+                Ingredients / Portions
+              </h4>
+              <div className="divide-y divide-gray-100/50 dark:divide-zinc-800/50">
+                {meal.foods.map((food, idx) => (
+                  <div key={idx} className="py-2 flex justify-between items-start text-xs">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-zinc-200">{food.name}</p>
+                      <p className="text-gray-400 dark:text-zinc-500 text-[11px]">
+                        {food.portion} • {food.estimatedWeight}g
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-emerald-600 dark:text-emerald-500">{food.calories} kcal</p>
+                      <p className="text-gray-400 dark:text-zinc-500 text-[10px]">
+                        P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Micro Summary */}
+          <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-zinc-800/40 rounded-xl border border-gray-100/20 dark:border-zinc-800/30">
+            <div>
+              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-zinc-500">Fiber</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{meal.fiber ?? 0}g</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-zinc-500">Sodium</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{meal.sodium ?? 0}mg</p>
+            </div>
+          </div>
+
+          {/* AI Tips / Insights */}
+          {meal.aiTips && meal.aiTips.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                <Sparkles size={14} />
+                <span>Coach Insights</span>
+              </div>
+              <ul className="list-disc pl-4 space-y-1 text-xs text-gray-600 dark:text-zinc-300">
+                {meal.aiTips.map((tip, idx) => (
+                  <li key={idx}>{tip}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

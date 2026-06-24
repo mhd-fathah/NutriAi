@@ -3,6 +3,41 @@ import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type MealDocument = Meal & Document;
 
+@Schema({ _id: false })
+export class FoodItem {
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  portion: string;
+
+  @Prop({ required: true, default: 0 })
+  estimatedWeight: number;
+
+  @Prop({ required: true, default: 0 })
+  calories: number;
+
+  @Prop({ required: true, default: 0 })
+  protein: number;
+
+  @Prop({ required: true, default: 0 })
+  carbs: number;
+
+  @Prop({ required: true, default: 0 })
+  fat: number;
+
+  @Prop({ required: true, default: 0 })
+  sugar: number;
+
+  @Prop({ required: true, default: 0 })
+  fiber: number;
+
+  @Prop({ required: true, default: 0 })
+  sodium: number;
+}
+
+const FoodItemSchema = SchemaFactory.createForClass(FoodItem);
+
 @Schema({ timestamps: { createdAt: true, updatedAt: false } })
 export class Meal {
   _id: Types.ObjectId;
@@ -36,6 +71,21 @@ export class Meal {
 
   @Prop({ required: true, default: 0 })
   sugar: number;
+
+  @Prop({ required: true, default: 0 })
+  fiber: number;
+
+  @Prop({ required: true, default: 0 })
+  sodium: number;
+
+  @Prop({ type: [FoodItemSchema], default: [] })
+  foods: FoodItem[];
+
+  @Prop({ required: true, default: 100 })
+  confidence: number;
+
+  @Prop({ required: true, default: '2.0' })
+  analysisVersion: string;
 
   @Prop({ type: [String], default: [] })
   aiTips: string[];

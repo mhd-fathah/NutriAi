@@ -1,3 +1,16 @@
+export interface FoodItemEntity {
+  name: string;
+  portion: string;
+  estimatedWeight: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  sugar: number;
+  fiber: number;
+  sodium: number;
+}
+
 export class MealEntity {
   id: string;
   userId: string;
@@ -10,6 +23,11 @@ export class MealEntity {
   carbs: number;
   fat: number;
   sugar: number;
+  fiber: number;
+  sodium: number;
+  foods: FoodItemEntity[];
+  confidence: number;
+  analysisVersion: string;
   aiTips: string[];
   isEstimated: boolean;
   aiStatus: 'success' | 'fallback';

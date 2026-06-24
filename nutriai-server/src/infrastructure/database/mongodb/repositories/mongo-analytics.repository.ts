@@ -51,7 +51,7 @@ export class MongoAnalyticsRepository implements IAnalyticsRepository {
     userId: string,
     startDate: Date,
     endDate: Date,
-  ): Promise<{ calories: number; protein: number; carbs: number; fat: number; sugar: number }> {
+  ): Promise<{ calories: number; protein: number; carbs: number; fat: number; sugar: number; fiber: number; sodium: number }> {
     const results = await this.mealModel.aggregate([
       {
         $match: {
@@ -67,12 +67,14 @@ export class MongoAnalyticsRepository implements IAnalyticsRepository {
           carbs: { $sum: '$carbs' },
           fat: { $sum: '$fat' },
           sugar: { $sum: '$sugar' },
+          fiber: { $sum: '$fiber' },
+          sodium: { $sum: '$sodium' },
         },
       },
     ]);
 
     if (results.length === 0) {
-      return { calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0 };
+      return { calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0 };
     }
 
     return {
@@ -81,6 +83,8 @@ export class MongoAnalyticsRepository implements IAnalyticsRepository {
       carbs: results[0].carbs,
       fat: results[0].fat,
       sugar: results[0].sugar,
+      fiber: results[0].fiber || 0,
+      sodium: results[0].sodium || 0,
     };
   }
 

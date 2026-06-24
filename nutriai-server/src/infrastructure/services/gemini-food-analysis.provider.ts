@@ -1,42 +1,76 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { z } from 'zod';
-import { IFoodAnalysisProvider } from '../../domain/providers/food-analysis-provider.interface';
+import type { IFoodAnalysisProvider } from '../../domain/providers/food-analysis-provider.interface';
+import { retryWithBackoff } from '../../common/utils/retry.util';
+import { extractJSON } from '../../common/utils/json-extraction.util';
+import {
+  MultiStageNutritionSchema,
+  NutritionTipsSchema,
+  MultiStageNutrition,
+  NutritionTips,
+} from '../../common/validation/gemini.schemas';
 
-const NUTRITION_PROMPT = `Analyze this food image.
-Identify all visible foods.
-Estimate realistic nutrition values.
-Return ONLY valid JSON.
+const NUTRITION_PROMPT = `You are an expert nutritionist and food analyst. Analyze this food image carefully.
+Tasks:
+1. Identify every visible food item.
+2. Estimate realistic serving sizes.
+3. Estimate weight in grams.
+4. Calculate nutrition values (calories, protein, carbs, fat, sugar, fiber, sodium) for each food.
+5. Calculate total nutrition values.
+6. Assign a confidence score (0-100) based on image clarity and visibility.
 
-{
-  "foodName": "",
-  "estimatedWeight": 0,
-  "calories": 0,
-  "protein": 0,
-  "carbs": 0,
-  "fat": 0,
-  "sugar": 0
-}
+Be conservative. Do not exaggerate calories. Do not invent foods not visible in the image.`;
 
-No markdown.
-No explanation.
-JSON only.`;
+const NUTRITION_RESPONSE_SCHEMA = {
+  type: 'object',
+  properties: {
+    foods: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          portion: { type: 'string' },
+          estimatedWeight: { type: 'number' },
+          calories: { type: 'number' },
+          protein: { type: 'number' },
+          carbs: { type: 'number' },
+          fat: { type: 'number' },
+          sugar: { type: 'number' },
+          fiber: { type: 'number' },
+          sodium: { type: 'number' },
+        },
+        required: ['name', 'portion', 'estimatedWeight', 'calories', 'protein', 'carbs', 'fat', 'sugar', 'fiber', 'sodium'],
+      },
+    },
+    totals: {
+      type: 'object',
+      properties: {
+        calories: { type: 'number' },
+        protein: { type: 'number' },
+        carbs: { type: 'number' },
+        fat: { type: 'number' },
+        sugar: { type: 'number' },
+        fiber: { type: 'number' },
+        sodium: { type: 'number' },
+      },
+      required: ['calories', 'protein', 'carbs', 'fat', 'sugar', 'fiber', 'sodium'],
+    },
+    confidence: { type: 'number' },
+  },
+  required: ['foods', 'totals', 'confidence'],
+};
 
-const NutritionAnalysisSchema = z.object({
-  foodName: z.string().default('Unknown Food'),
-  estimatedWeight: z
-    .union([z.number(), z.string()])
-    .transform((val) => {
-      if (typeof val === 'number') return `${val}g`;
-      return val || 'Unknown';
-    })
-    .default('Unknown'),
-  calories: z.coerce.number().default(0),
-  protein: z.coerce.number().default(0),
-  carbs: z.coerce.number().default(0),
-  fat: z.coerce.number().default(0),
-  sugar: z.coerce.number().default(0),
-});
+const TIPS_RESPONSE_SCHEMA = {
+  type: 'object',
+  properties: {
+    tips: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  },
+  required: ['tips'],
+};
 
 @Injectable()
 export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
@@ -56,53 +90,86 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
     return this.genAI;
   }
 
-  private safeParseJSON<T>(text: string): T | null {
-    try {
-      const cleaned = text
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim();
-      return JSON.parse(cleaned) as T;
-    } catch {
-      return null;
+  private validateAndSanitize(parsedObj: any): MultiStageNutrition {
+    const validated = MultiStageNutritionSchema.parse(parsedObj);
+
+    // Validate realistic limits for each food item
+    validated.foods = validated.foods.map((item) => {
+      const weight = item.estimatedWeight || 100;
+      
+      let protein = Math.max(0, item.protein);
+      let carbs = Math.max(0, item.carbs);
+      let fat = Math.max(0, item.fat);
+      let sugar = Math.max(0, item.sugar);
+      let fiber = Math.max(0, item.fiber);
+
+      const totalMacros = protein + carbs + fat;
+      if (totalMacros > weight) {
+        const scale = weight / totalMacros;
+        protein = Math.round(protein * scale * 10) / 10;
+        carbs = Math.round(carbs * scale * 10) / 10;
+        fat = Math.round(fat * scale * 10) / 10;
+      }
+
+      if (sugar > carbs) {
+        sugar = carbs;
+      }
+
+      if (fiber > carbs) {
+        fiber = carbs;
+      }
+
+      return {
+        ...item,
+        protein,
+        carbs,
+        fat,
+        sugar,
+        fiber,
+      };
+    });
+
+    // Ensure totals represent the sum of food items
+    const calculatedTotals = validated.foods.reduce(
+      (acc, item) => {
+        acc.calories += item.calories;
+        acc.protein += item.protein;
+        acc.carbs += item.carbs;
+        acc.fat += item.fat;
+        acc.sugar += item.sugar;
+        acc.fiber += item.fiber;
+        acc.sodium += item.sodium;
+        return acc;
+      },
+      { calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0, fiber: 0, sodium: 0 },
+    );
+
+    if (validated.totals.calories <= 0 && calculatedTotals.calories > 0) {
+      validated.totals = calculatedTotals;
     }
+
+    return validated;
   }
 
-  private cleanAndParseJSON(text: string) {
-    let cleaned = text.trim();
-    const jsonMatch = cleaned.match(/\{[\s\S]*?\}/);
-    if (jsonMatch) {
-      cleaned = jsonMatch[0];
-    }
-
-    const parsedObj = this.safeParseJSON<any>(cleaned);
-    if (!parsedObj) {
-      throw new Error('JSON parsing failed');
-    }
-
-    const validated = NutritionAnalysisSchema.safeParse(parsedObj);
-    if (!validated.success) {
-      throw new Error(validated.error.message);
-    }
-
-    return {
-      foodName: validated.data.foodName,
-      estimatedWeight: validated.data.estimatedWeight,
-      calories: validated.data.calories,
-      protein: validated.data.protein,
-      carbs: validated.data.carbs,
-      fat: validated.data.fat,
-      sugar: validated.data.sugar,
-    };
+  private cleanAndParseJSON(text: string): MultiStageNutrition {
+    const parsedObj = extractJSON(text);
+    return this.validateAndSanitize(parsedObj);
   }
 
   private async callGeminiModel(
     modelName: string,
     imageBase64: string,
     mimeType: string,
-  ) {
+  ): Promise<MultiStageNutrition> {
     const genAI = this.getGenAI();
-    const model = genAI.getGenerativeModel({ model: modelName });
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: NUTRITION_RESPONSE_SCHEMA as any,
+      },
+    });
+
     const result = await model.generateContent([
       NUTRITION_PROMPT,
       { inlineData: { data: imageBase64, mimeType } },
@@ -116,53 +183,81 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
     imageBase64: string,
     mimeType: string = 'image/jpeg',
   ) {
-    const primaryRetries = 3;
-    const delays = [2000, 5000, 10000];
+    const retryOptions = {
+      maxAttempts: 3,
+      initialDelayMs: 2000,
+      maxDelayMs: 15000,
+      backoffFactor: 2.5,
+      useJitter: true,
+    };
 
-    for (let attempt = 0; attempt <= primaryRetries; attempt++) {
-      try {
-        if (attempt > 0) {
-          this.logger.warn(
-            `Retrying Primary Gemini attempt ${attempt} after ${delays[attempt - 1]}ms...`,
-          );
-          await new Promise((resolve) => setTimeout(resolve, delays[attempt - 1]));
-        }
-
-        const data = await this.callGeminiModel(
-          this.primaryModel,
-          imageBase64,
-          mimeType,
-        );
-
-        return {
-          ...data,
-          isEstimated: false,
-          aiStatus: 'success' as const,
-          aiProvider: 'gemini' as const,
-        };
-      } catch (err) {
-        this.logger.warn(`Primary model attempt ${attempt} failed: ${err.message}`);
-      }
-    }
-
+    // 1. Try Primary Model
     try {
-      this.logger.warn(`Switching to Fallback Model: ${this.fallbackModel}`);
-      const data = await this.callGeminiModel(
-        this.fallbackModel,
-        imageBase64,
-        mimeType,
+      this.logger.log(`Analyzing food with primary model: ${this.primaryModel}`);
+      const data = await retryWithBackoff(
+        () => this.callGeminiModel(this.primaryModel, imageBase64, mimeType),
+        retryOptions,
+        this.logger,
+        'GeminiPrimaryFoodAnalysis',
       );
 
+      const foodName = data.foods.map((f) => f.name).join(', ') || 'Unknown Food';
+      const totalWeight = data.foods.reduce((acc, f) => acc + f.estimatedWeight, 0);
+
       return {
-        ...data,
+        foodName,
+        estimatedWeight: `${totalWeight}g`,
+        calories: data.totals.calories,
+        protein: data.totals.protein,
+        carbs: data.totals.carbs,
+        fat: data.totals.fat,
+        sugar: data.totals.sugar,
+        fiber: data.totals.fiber,
+        sodium: data.totals.sodium,
+        foods: data.foods,
+        confidence: data.confidence,
         isEstimated: false,
         aiStatus: 'success' as const,
         aiProvider: 'gemini' as const,
       };
-    } catch (err) {
-      this.logger.warn(`Fallback Model ${this.fallbackModel} failed: ${err.message}`);
+    } catch (primaryErr) {
+      this.logger.error(`Primary model analysis failed: ${primaryErr.message}`);
     }
 
+    // 2. Try Fallback Model
+    try {
+      this.logger.warn(`Switching to fallback model: ${this.fallbackModel}`);
+      const data = await retryWithBackoff(
+        () => this.callGeminiModel(this.fallbackModel, imageBase64, mimeType),
+        retryOptions,
+        this.logger,
+        'GeminiFallbackFoodAnalysis',
+      );
+
+      const foodName = data.foods.map((f) => f.name).join(', ') || 'Unknown Food';
+      const totalWeight = data.foods.reduce((acc, f) => acc + f.estimatedWeight, 0);
+
+      return {
+        foodName,
+        estimatedWeight: `${totalWeight}g`,
+        calories: data.totals.calories,
+        protein: data.totals.protein,
+        carbs: data.totals.carbs,
+        fat: data.totals.fat,
+        sugar: data.totals.sugar,
+        fiber: data.totals.fiber,
+        sodium: data.totals.sodium,
+        foods: data.foods,
+        confidence: data.confidence,
+        isEstimated: false,
+        aiStatus: 'success' as const,
+        aiProvider: 'gemini' as const,
+      };
+    } catch (fallbackErr) {
+      this.logger.error(`Fallback model analysis failed: ${fallbackErr.message}`);
+    }
+
+    // 3. Fallback to Local Estimates
     this.logger.warn('All Gemini attempts failed. Returning estimated values.');
     return {
       foodName: 'Estimated Meal',
@@ -172,6 +267,23 @@ export class GeminiFoodAnalysisProvider implements IFoodAnalysisProvider {
       carbs: 60,
       fat: 15,
       sugar: 5,
+      fiber: 4,
+      sodium: 600,
+      foods: [
+        {
+          name: 'Estimated Meal',
+          portion: 'Regular',
+          estimatedWeight: 250,
+          calories: 500,
+          protein: 20,
+          carbs: 60,
+          fat: 15,
+          sugar: 5,
+          fiber: 4,
+          sodium: 600,
+        },
+      ],
+      confidence: 50,
       isEstimated: true,
       aiStatus: 'fallback' as const,
       aiProvider: 'local' as const,
@@ -200,37 +312,47 @@ Consumed Today: ${context.consumedCalories} kcal
 Remaining: ${context.dailyCalories - context.consumedCalories} kcal
 Protein Today: ${context.protein}g
 Carbs Today: ${context.carbs}g
-Fat Today: ${context.fat}g
+Fat Today: ${context.fat}g`;
 
-Return ONLY this JSON format, no markdown, no explanation:
-{"tips": ["tip 1", "tip 2", "tip 3"]}`;
+    const retryOptions = {
+      maxAttempts: 2,
+      initialDelayMs: 2000,
+      maxDelayMs: 8000,
+      backoffFactor: 2,
+      useJitter: true,
+    };
 
     const modelsToTry = [this.primaryModel, this.fallbackModel];
-    const delays = [2000, 5000];
 
     for (const modelName of modelsToTry) {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          if (attempt > 0) {
-            this.logger.warn(
-              `Retrying tips generation with ${modelName} attempt ${attempt} after ${delays[attempt - 1]}ms...`,
-            );
-            await new Promise((resolve) => setTimeout(resolve, delays[attempt - 1]));
-          }
+      try {
+        this.logger.log(`Generating tips with model: ${modelName}`);
+        const result = await retryWithBackoff(
+          async () => {
+            const genAI = this.getGenAI();
+            const model = genAI.getGenerativeModel({
+              model: modelName,
+              generationConfig: {
+                responseMimeType: 'application/json',
+                responseSchema: TIPS_RESPONSE_SCHEMA as any,
+              },
+            });
+            const res = await model.generateContent(prompt);
+            const text = res.response.text();
+            const parsed = extractJSON<any>(text);
+            const validated = NutritionTipsSchema.parse(parsed);
+            return validated.tips;
+          },
+          retryOptions,
+          this.logger,
+          `GeminiTipsGeneration-${modelName}`,
+        );
 
-          const genAI = this.getGenAI();
-          const model = genAI.getGenerativeModel({ model: modelName });
-          const result = await model.generateContent(prompt);
-          const text = result.response.text();
-          const parsed = this.safeParseJSON<{ tips: string[] }>(text);
-          if (parsed?.tips && Array.isArray(parsed.tips)) {
-            return parsed.tips.slice(0, 3);
-          }
-        } catch (e) {
-          this.logger.warn(
-            `Failed to generate tips with ${modelName} on attempt ${attempt}: ${e.message}`,
-          );
+        if (result && Array.isArray(result) && result.length > 0) {
+          return result.slice(0, 3);
         }
+      } catch (e) {
+        this.logger.error(`Tips generation with ${modelName} failed: ${e.message}`);
       }
     }
 

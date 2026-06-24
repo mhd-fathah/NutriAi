@@ -40,6 +40,19 @@ export interface UserProfile {
   updatedAt: string;
 }
 
+export interface FoodItem {
+  name: string;
+  portion: string;
+  estimatedWeight: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  sugar: number;
+  fiber: number;
+  sodium: number;
+}
+
 export interface MealRecord {
   id?: string;
   _id?: string;
@@ -53,6 +66,11 @@ export interface MealRecord {
   carbs: number;
   fat: number;
   sugar: number;
+  fiber?: number;
+  sodium?: number;
+  foods?: FoodItem[];
+  confidence?: number;
+  analysisVersion?: string;
   aiTips: string[];
   isEstimated: boolean;
   aiStatus: "success" | "fallback";

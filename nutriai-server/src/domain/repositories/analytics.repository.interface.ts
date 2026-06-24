@@ -9,7 +9,7 @@ export interface IAnalyticsRepository {
     userId: string,
     startDate: Date,
     endDate: Date,
-  ): Promise<{ calories: number; protein: number; carbs: number; fat: number; sugar: number }>;
+  ): Promise<{ calories: number; protein: number; carbs: number; fat: number; sugar: number; fiber: number; sodium: number }>;
 
   getMealDatesDescending(userId: string): Promise<Date[]>;
 }
