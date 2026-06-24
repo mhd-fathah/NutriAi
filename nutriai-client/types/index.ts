@@ -20,7 +20,8 @@ export interface NutritionValues {
 }
 
 export interface UserProfile {
-  _id: string;
+  id?: string;
+  _id?: string;
   name: string;
   email: string;
   age?: number;
@@ -40,7 +41,8 @@ export interface UserProfile {
 }
 
 export interface MealRecord {
-  _id: string;
+  id?: string;
+  _id?: string;
   userId: string;
   mealType: MealType;
   imageUrl: string;

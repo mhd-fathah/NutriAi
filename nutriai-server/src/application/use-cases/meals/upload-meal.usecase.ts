@@ -1,0 +1,107 @@
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
+import type { IMealRepository } from '../../../domain/repositories/meal.repository.interface';
+import type { IFoodAnalysisProvider } from '../../../domain/providers/food-analysis-provider.interface';
+import { CloudinaryService } from '../../../infrastructure/services/cloudinary.service';
+
+@Injectable()
+export class UploadMealUseCase {
+  constructor(
+    @Inject('IUserRepository')
+    private readonly userRepository: IUserRepository,
+    @Inject('IMealRepository')
+    private readonly mealRepository: IMealRepository,
+    @Inject('IFoodAnalysisProvider')
+    private readonly foodAnalysisProvider: IFoodAnalysisProvider,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
+
+  async execute(
+    userId: string,
+    data: {
+      mealType: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+      imageBase64: string;
+      mimeType?: string;
+    },
+  ) {
+    const { mealType, imageBase64, mimeType = 'image/jpeg' } = data;
+
+    // 1. Check user context
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // 2. Run AI Food Recognition
+    const nutrition = await this.foodAnalysisProvider.analyzeFood(imageBase64, mimeType);
+
+    // 3. Upload to Cloudinary
+    let imageUrl = '';
+    try {
+      const uploadResult = await this.cloudinaryService.uploadImage(
+        imageBase64,
+        mimeType,
+      );
+      imageUrl = uploadResult.url;
+    } catch (cloudinaryError) {
+      imageUrl = `data:${mimeType};base64,${imageBase64}`;
+    }
+
+    // 4. Fetch today's meals to calculate daily totals for tips
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const todayMeals = await this.mealRepository.findByUserIdAndDateRange(
+      userId,
+      startOfDay,
+      endOfDay,
+    );
+
+    const consumed = todayMeals.reduce(
+      (acc, m) => ({
+        calories: acc.calories + m.calories,
+        protein: acc.protein + m.protein,
+        carbs: acc.carbs + m.carbs,
+        fat: acc.fat + m.fat,
+      }),
+      { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    );
+
+    const totalCalories = consumed.calories + nutrition.calories;
+    const totalProtein = consumed.protein + nutrition.protein;
+    const totalCarbs = consumed.carbs + nutrition.carbs;
+    const totalFat = consumed.fat + nutrition.fat;
+
+    // 5. Generate Coaching Tips
+    const tips = await this.foodAnalysisProvider.generateNutritionTips({
+      goal: user.goal || 'maintain_weight',
+      dailyCalories: user.dailyCalories || 2000,
+      consumedCalories: totalCalories,
+      protein: totalProtein,
+      carbs: totalCarbs,
+      fat: totalFat,
+    });
+
+    // 6. Save meal to database
+    const meal = await this.mealRepository.create({
+      userId,
+      mealType,
+      imageUrl,
+      foodName: nutrition.foodName,
+      estimatedWeight: nutrition.estimatedWeight,
+      calories: nutrition.calories,
+      protein: nutrition.protein,
+      carbs: nutrition.carbs,
+      fat: nutrition.fat,
+      sugar: nutrition.sugar,
+      aiTips: tips,
+      isEstimated: nutrition.isEstimated,
+      aiStatus: nutrition.aiStatus,
+      aiProvider: nutrition.aiProvider,
+    });
+
+    return meal;
+  }
+}

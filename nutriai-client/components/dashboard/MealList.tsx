@@ -59,7 +59,7 @@ export function TodayMealsList({ meals }: { meals: MealRecord[] }) {
   return (
     <div className="space-y-3">
       {meals.map((meal) => (
-        <MealCard key={meal._id} meal={meal} />
+        <MealCard key={meal.id || meal._id} meal={meal} />
       ))}
     </div>
   );

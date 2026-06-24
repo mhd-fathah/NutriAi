@@ -242,7 +242,7 @@ export default function HistoryPage() {
             ) : (
               <div className="space-y-4">
                 {data.meals.map((meal) => (
-                  <MealHistoryCard key={meal._id} meal={meal} />
+                  <MealHistoryCard key={meal.id || meal._id} meal={meal} />
                 ))}
               </div>
             )}

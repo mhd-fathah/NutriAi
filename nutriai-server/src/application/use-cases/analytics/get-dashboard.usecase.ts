@@ -1,20 +1,23 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
-import type { IMealRepository } from '../meals/repositories/meal.repository.interface';
-import type { IUserRepository } from '../users/repositories/user.repository.interface';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
+import type { IMealRepository } from '../../../domain/repositories/meal.repository.interface';
+import type { IAnalyticsRepository } from '../../../domain/repositories/analytics.repository.interface';
 
 @Injectable()
-export class AnalyticsService {
+export class GetDashboardUseCase {
   constructor(
-    @Inject('IMealRepository')
-    private readonly mealRepository: IMealRepository,
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
+    @Inject('IMealRepository')
+    private readonly mealRepository: IMealRepository,
+    @Inject('IAnalyticsRepository')
+    private readonly analyticsRepository: IAnalyticsRepository,
   ) {}
 
-  async getDashboardData(userId: string) {
+  async execute(userId: string) {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const startOfDay = new Date();
@@ -29,24 +32,19 @@ export class AnalyticsService {
       endOfDay,
     );
 
-    // 2. Today's nutrition totals
-    const todayNutrition = todayMeals.reduce(
-      (acc, m) => ({
-        calories: acc.calories + m.calories,
-        protein: acc.protein + m.protein,
-        carbs: acc.carbs + m.carbs,
-        fat: acc.fat + m.fat,
-        sugar: acc.sugar + m.sugar,
-      }),
-      { calories: 0, protein: 0, carbs: 0, fat: 0, sugar: 0 },
+    // 2. Today's nutrition totals via aggregation pipeline
+    const todayNutrition = await this.analyticsRepository.getNutritionTotalsForRange(
+      userId,
+      startOfDay,
+      endOfDay,
     );
 
-    // 3. Weekly data (last 7 days)
+    // 3. Weekly data (last 7 days) via aggregation pipeline
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - 6);
     weekStart.setHours(0, 0, 0, 0);
 
-    const weeklyMeals = await this.mealRepository.findByUserIdAndDateRange(
+    const weeklyStats = await this.analyticsRepository.getDailyStatsForRange(
       userId,
       weekStart,
       new Date(),
@@ -66,34 +64,28 @@ export class AnalyticsService {
       });
     }
 
-    weeklyMeals.forEach((m) => {
-      const key = m.createdAt.toISOString().split('T')[0];
-      const existing = weeklyMap.get(key);
+    weeklyStats.forEach((stat) => {
+      const existing = weeklyMap.get(stat.date);
       if (existing) {
-        existing.calories += m.calories;
-        existing.protein += m.protein;
-        existing.carbs += m.carbs;
-        existing.fat += m.fat;
+        existing.calories = stat.calories;
+        existing.protein = stat.protein;
+        existing.carbs = stat.carbs;
+        existing.fat = stat.fat;
       }
     });
 
     const weeklyData = Array.from(weeklyMap.values());
 
-    // 4. Calculate Streak
-    // Fetch all meals of the user sorted by date descending
-    const allMeals = await this.mealRepository.findByUserIdAndDateRange(
-      userId,
-      new Date(0), // All time
-      new Date(),
-    );
+    // 4. Calculate Streak using meal dates
+    const mealDates = await this.analyticsRepository.getMealDatesDescending(userId);
 
     let streak = 0;
-    if (allMeals.length > 0) {
-      const mealDates = allMeals.map((m) => {
-        const d = new Date(m.createdAt);
-        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    if (mealDates.length > 0) {
+      const dayTimes = mealDates.map((d) => {
+        const dateObj = new Date(d);
+        return new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
       });
-      const uniqueSortedDates = Array.from(new Set(mealDates)).sort(
+      const uniqueSortedDates = Array.from(new Set(dayTimes)).sort(
         (a, b) => b - a,
       );
 
@@ -127,7 +119,7 @@ export class AnalyticsService {
     const latestTips = todayMeals[0]?.aiTips || [];
 
     const userProfile = {
-      id: user._id.toString(),
+      id: user.id,
       name: user.name,
       email: user.email,
       age: user.age,

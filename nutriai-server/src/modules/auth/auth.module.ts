@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RegisterUserUseCase } from '../../application/use-cases/auth/register-user.usecase';
+import { LoginUserUseCase } from '../../application/use-cases/auth/login-user.usecase';
+import { GoogleLoginUseCase } from '../../application/use-cases/auth/google-login.usecase';
 
 @Module({
   imports: [
@@ -18,7 +20,12 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtModule, PassportModule],
+  providers: [
+    RegisterUserUseCase,
+    LoginUserUseCase,
+    GoogleLoginUseCase,
+    JwtStrategy,
+  ],
+  exports: [JwtModule, PassportModule],
 })
 export class AuthModule {}

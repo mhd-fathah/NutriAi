@@ -31,7 +31,7 @@ export class CloudinaryService {
         publicId: result.public_id,
       };
     } catch (error) {
-      this.logger.error(`Cloudinary upload failed: ${error.message}`);
+      this.logger.warn(`Cloudinary upload failed: ${error.message}`);
       throw error;
     }
   }

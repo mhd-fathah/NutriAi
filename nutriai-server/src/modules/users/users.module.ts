@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './schemas/user.schema';
-import { UserRepository } from './repositories/user.repository';
+import { User, UserSchema } from '../../infrastructure/database/mongodb/schemas/user.schema';
+import { MongoUserRepository } from '../../infrastructure/database/mongodb/repositories/mongo-user.repository';
 import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { NutritionGoalService } from '../../domain/services/nutrition-goal.service';
+import { CompleteOnboardingUseCase } from '../../application/use-cases/users/complete-onboarding.usecase';
+import { GetUserProfileUseCase } from '../../application/use-cases/users/get-user-profile.usecase';
+import { UpdateUserProfileUseCase } from '../../application/use-cases/users/update-user-profile.usecase';
 
 @Module({
   imports: [
@@ -11,14 +14,20 @@ import { UsersService } from './users.service';
   ],
   controllers: [UsersController],
   providers: [
-    UsersService,
+    NutritionGoalService,
+    CompleteOnboardingUseCase,
+    GetUserProfileUseCase,
+    UpdateUserProfileUseCase,
     {
       provide: 'IUserRepository',
-      useClass: UserRepository,
+      useClass: MongoUserRepository,
     },
   ],
   exports: [
     'IUserRepository',
+    CompleteOnboardingUseCase,
+    GetUserProfileUseCase,
+    UpdateUserProfileUseCase,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
 })

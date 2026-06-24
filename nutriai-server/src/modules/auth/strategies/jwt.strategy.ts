@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import type { IUserRepository } from '../../users/repositories/user.repository.interface';
+import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { Inject } from '@nestjs/common';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found');
     }
     return {
-      id: user._id.toString(),
+      id: user.id,
       email: user.email,
       name: user.name,
     };
